@@ -18,26 +18,29 @@ package main
 
 // Key names
 const (
-	expKey		= "Exporter"
-	ebKey		= "ExportersBank"
-	expBalKey	= "ExportersAccountBalance"
-	impKey		= "Importer"
-	ibKey		= "ImportersBank"
-	impBalKey	= "ImportersAccountBalance"
-	carKey		= "Carrier"
-	raKey		= "RegulatoryAuthority"
+	expKey    = "Exporter"
+	ebKey     = "ExportersBank"
+	expBalKey = "ExportersAccountBalance"
+	impKey    = "Importer"
+	ibKey     = "ImportersBank"
+	impBalKey = "ImportersAccountBalance"
+	carKey    = "Carrier"
+	raKey     = "RegulatoryAuthority"
 )
 
 // State values
 const (
-	REQUESTED	= "REQUESTED"
-	ACCEPTED	= "ACCEPTED"
-	PREPAYMENT  = "PREPAYMENT"
-	CLOSED      = "CLOSED"
+	REQUESTED  = "REQUESTED"
+	ACCEPTED   = "ACCEPTED"
+	PREPAYMENT = "PREPAYMENT"
+	SETOFF     = "SETOFF"
+	DELIVERED  = "DELIVERED"
+	PAID       = "PAID"
+	CLOSED     = "CLOSED"
 )
 
 // Location values
 const (
-	SOURCE		= "SOURCE"
-	DESTINATION	= "DESTINATION"
+	SOURCE      = "SOURCE"
+	DESTINATION = "DESTINATION"
 )

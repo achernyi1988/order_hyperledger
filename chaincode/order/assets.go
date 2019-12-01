@@ -17,9 +17,18 @@
 package main
 
 type TradeAgreement struct {
-	Amount			float64		`json:"amount"`
-	DescriptionOfGoods	string		`json:"descriptionOfGoods"`
-	Status			string		`json:"status"`
-	Payment			float64		`json:"payment"`
-	Numbers         int     `json:"numbers"`
+	Amount             float64 `json:"amount"`
+	DescriptionOfGoods string  `json:"descriptionOfGoods"`
+	Status             string  `json:"status"`
+	Payment            float64 `json:"payment"`
+	Numbers            int     `json:"numbers"`
+}
+
+type ShipmentDelivery struct {
+	SourcePort      string `json:"sourcePort"`
+	DestinationPort string `json:"destinationPort"`
+	Location        string `json:"location"`
+	StartDate       string `json:"startDate"`
+	EndDate         string `json:"endDate"`
+	TradeId         string `json:"tradeId"`
 }
