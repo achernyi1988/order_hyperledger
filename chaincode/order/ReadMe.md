@@ -1,7 +1,7 @@
 --------------------------NET MODE-------------------------------
 
 #export
-export CORE_PEER_MSPCONFIGPATH=/blockchain/hyperledger/book_2019/src/trade-finance-logistics/network/crypto-config/peerOrganizations/exporterorg.trade.com/users/Admin@exporterorg.trade.com/msp/ 
+export CORE_PEER_MSPCONFIGPATH=/blockchain/hyperledger/book_2019/src/trade-finance-logistics/order_hyperledger/network/crypto-config/peerOrganizations/exporterorg.trade.com/users/Admin@exporterorg.trade.com/msp/ 
 export CORE_PEER_ADDRESS=peer0.exporterorg.trade.com:7051
 export CORE_PEER_LOCALMSPID=ExporterOrgMSP
 
@@ -12,7 +12,7 @@ export CORE_PEER_LOCALMSPID=ImporterOrgMSP
 
 export CORE_PEER_TLS_ROOTCERT_FILE=/blockchain/hyperledger/book_2019/src/trade-finance-logistics/network/crypto-config/ordererOrganizations/trade.com/orderers/orderer.trade.com/tls/ca.crt
 
- peer channel create -o orderer.trade.com:7050 -c tradechannel -f channel-artifacts/channel.tx   --tls --cafile /blockchain/hyperledger/book_2019/src/trade-finance-logistics/order_hyperledger/network/crypto-config/ordererOrganizations/trade.com/orderers/orderer.trade.com/msp/tlscacerts/tlsca.trade.com-cert.pem
+peer channel create -o orderer.trade.com:7050 -c tradechannel -f channel-artifacts/channel.tx   --tls --cafile /blockchain/hyperledger/book_2019/src/trade-finance-logistics/order_hyperledger/network/crypto-config/ordererOrganizations/trade.com/orderers/orderer.trade.com/msp/tlscacerts/tlsca.trade.com-cert.pem
 
 peer channel join -b tradechannel.block
 peer channel fetch config tradechannel.block -o orderer.trade.com:7050 -c tradechannel
@@ -51,6 +51,8 @@ peer chaincode instantiate -C tradechannel -n test -c '{"Args":["init"]}' -o ord
 
 peer chaincode upgrade -o orderer.trade.com:7050 -C tradechannel -n test  -c '{"Args":["init"]}' -v 1
 
+
+---------------------------Chaincode------------------------------------
  
 peer chaincode invoke -n test -c '{"Args":["requestOrder","trade-1","17000","solar battery: Risen rsm 144-6-390m half-cell","187"]}' -C tradechannel
 peer chaincode invoke -n test -c '{"Args":["acceptOrder","trade-1"]}' -C tradechannel

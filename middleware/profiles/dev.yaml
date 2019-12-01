@@ -1,0 +1,12 @@
+# Sample YAML for client config
+name: "ExporterOrg Client"
+version: "1.0"
+client:
+  organization: ExporterOrg
+  credentialStore:
+    path: "./credstore/exporter_client/hfc-kvs"
+    cryptoStore:
+      path: "./credstore/exporter_client/hfc-cvs"
+  connection:
+    options:
+      grpc.keepalive_time_ms: 120000
