@@ -69,3 +69,10 @@ peer chaincode invoke -n test -c '{"Args":["getShipment","trade-1"]}' -C tradech
 
 peer chaincode invoke -n test -c '{"Args":["getBalance","ImporterBalance"]}' -C tradechannel
 peer chaincode invoke -n test -c '{"Args":["getBalance","ExporterBalance"]}' -C tradechannel 
+
+
+--------------------------POSTMAN------------------------------------------
+{
+	"fcn": "getOrder",
+	"args": ["trade-1"]
+}
