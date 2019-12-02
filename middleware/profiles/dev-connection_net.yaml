@@ -18,10 +18,10 @@ version: "1.0"
 # list of participating organizations in this network
 #
 organizations:
-  DevOrg:
-    mspid: DevOrgMSP
+  ExporterOrg:
+    mspid: ExporterOrgMSP
     peers:
-      - peer
+      - peer0.exporterorg.trade.com
      #  - Admin
 #  Budget:
 #    mspid: BudgetMSP
@@ -38,12 +38,12 @@ channels:
   tradechannel:
     # List of orderers designated by the application to use for transactions on this channel. 
     orderers:
-      - orderer
+      - orderer.trade.com
 
     # Required. list of peers from participating orgs
     peers:
       # Acme peer - with roles played by the peer
-      peer:
+      peer0.exporterorg.trade.com:
         # Roles for which this peer may be used
         endorsingPeer: true
         chaincodeQuery: true
@@ -66,7 +66,7 @@ channels:
 # being only one orderer is needed. 
 #
 orderers:
-  orderer:
+  orderer.trade.com:
     url: grpc://localhost:7050
 
     # these are standard properties defined by the gRPC library
@@ -83,7 +83,7 @@ orderers:
 # and event listener registration.
 #
 peers:
-  peer:
+  peer0.exporterorg.trade.com:
 
     url: grpc://127.0.0.1:7051
 

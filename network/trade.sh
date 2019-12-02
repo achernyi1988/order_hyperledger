@@ -109,6 +109,8 @@ function askProceed () {
 # Obtain CONTAINER_IDS and remove them
 # TODO Might want to make this optional - could clear other containers
 function clearContainers () {
+  docker volume prune -f
+  
   CONTAINER_IDS=$(docker ps -aq)
   if [ -z "$CONTAINER_IDS" -o "$CONTAINER_IDS" == " " ]; then
     echo "---- No containers available for deletion ----"

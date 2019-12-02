@@ -10,17 +10,17 @@ var sha = require('js-sha256');
 // Constants for profile, wallet & user
 const CONNECTION_PROFILE_PATH = './profiles/dev-connection.yaml'
 // Client section configuration
-const EXPORTER_CLIENT_CONNECTION_PROFILE_PATH = './profiles/dev.yaml'
+const DEV_CLIENT_CONNECTION_PROFILE_PATH = './profiles/devOrg.yaml'
 const BUDGET_CLIENT_CONNECTION_PROFILE_PATH = './profiles/budget-max.yaml'
 
 // Org & User
-const MSP_ID = "ExporterOrgMSP"
-const ORG_NAME = 'exporterorg.trade.com'
-const USER_NAME = 'peer0.exporterorg.trade.com'   // Non admin identity will lead to 'access denied' try User1
-const PEER_NAME = 'peer0.exporterorg.trade.com'
+const MSP_ID = "DevOrgMSP"
+const ORG_NAME = 'devorg.trade.com'
+const USER_NAME = 'peer0.devorg.trade.com'   // Non admin identity will lead to 'access denied' try User1
+const PEER_NAME = 'peer'
 const CHANNEL_NAME = 'tradechannel'
 const CHAINCODE_ID = "test"
-const CRYPTO_CONFIG_CLIENT_PATH = "../network/crypto-config/peerOrganizations"
+const CRYPTO_CONFIG_CLIENT_PATH = "../network/devmode/crypto-config/peerOrganizations"
 
 // Variable to hold the client
 const client = Client.loadFromConfig(CONNECTION_PROFILE_PATH)
@@ -32,24 +32,8 @@ var channel = {}
 async function main() {
     // Setup the client instance
     await setupClient()
-
     // Setup the channel instance
     channel = await setupChannel()
-    
-   // console.log("channel", channel);
-    // Print the info for the chain
-   // await getChannelInfo()
-
-    // Print the chaincode info
-   // await getChaincodeInfo()
-
-
-   await queryChaincode();
-
-   await invokeChaincode();
-
-
-  // await queryChaincode();
 }
 
 
@@ -72,8 +56,8 @@ async function setupClient() {
 switchAccount = async (org, user) => {
 
     // setup the instance
-    if (org == 'exporterorg.trade.com') {
-        client.loadFromConfig(EXPORTER_CLIENT_CONNECTION_PROFILE_PATH)
+    if (org == 'devorg.trade.com') {
+        client.loadFromConfig(DEV_CLIENT_CONNECTION_PROFILE_PATH)
     } else if (org == 'budget') {
         client.loadFromConfig(BUDGET_CLIENT_CONNECTION_PROFILE_PATH)
     } else {
@@ -141,7 +125,7 @@ async function createUserContext(org, user) {
  
     let opts = {
         username: user,
-        mspid:  "ExporterOrgMSP",
+        mspid:  MSP_ID,
         cryptoContent: {
             privateKey: privateKeyPath,
             signedCert: certPath
@@ -172,7 +156,7 @@ function getCertPath(org, user) {
     //var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + ".com/users/" + user + "@" + org + ".com/msp/signcerts/" + user + "@" + org + ".com-cert.pem"
 
     //var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + PEER_NAME + `/msp/signcerts/peer0.exporterorg.trade.com-cert.pem`
-    var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + PEER_NAME + `/msp/signcerts/peer0.exporterorg.trade.com-cert.pem`
+    var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + USER_NAME + `/msp/signcerts/peer0.devorg.trade.com-cert.pem`
 
     console.log("getCertPath", certPath);
     return certPath
@@ -187,7 +171,7 @@ function getCertPath(org, user) {
 function getPrivateKeyPath(org, user) {
     // ../crypto/crypto-config/peerOrganizations/budget.com/users/Admin@budget.com/msp/keystore/05beac9849f610ad5cc8997e5f45343ca918de78398988def3f288b60d8ee27c_sk
     //var pkFolder = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + ".com/users/" + user + "@" + org + ".com/msp/keystore"
-    var pkFolder = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + PEER_NAME + "/msp/keystore"
+    var pkFolder = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + USER_NAME + "/msp/keystore"
     console.log("getPrivateKeyPath pkFolder:",pkFolder);
     fs.readdirSync(pkFolder).forEach(file => {
        // console.log("getPrivateKeyPath ",file);
@@ -251,7 +235,7 @@ async function getChaincodeInfo(){
 }
 
 
-invokeChaincode = async(callback) => {
+invokeChaincode = async(fcn,args, callback) => {
 
     // Get the peer for channel. 
     let peerName = channel.getChannelPeer(PEER_NAME)
@@ -265,8 +249,8 @@ invokeChaincode = async(callback) => {
     var request = {
         targets: peerName,
         chaincodeId: CHAINCODE_ID,
-        fcn: 'prepareShipment',
-        args: ["trade-1","Shanghai","Odessa","Shanghai","19.02.2020","20.03.2020"],
+        fcn,
+        args,
         chainId: CHANNEL_NAME,
         txId: tx_id
     };
@@ -340,7 +324,7 @@ invokeChaincode = async(callback) => {
             // do the housekeeping when there is a problem
             event_hub.unregisterTxEvent(tx_id_string);
             console.log('Timeout - Failed to receive the transaction event');
-
+            callback("Timeout - Failed to receive the transaction event");
             event_hub.disconnect();
         }
 
@@ -360,12 +344,11 @@ invokeChaincode = async(callback) => {
             let message = util.format('\tThe invoke chaincode transaction was invalid, code:%s',code);
             console.log(message);
         
-          //  callback("submitted failed");
+            callback("submitted failed");
         } else {
             shouldUnregister = false;
             console.log('\tThe invoke chaincode transaction was VALID.');
-            await queryChaincode()
-          //  callback("submitted successfully");
+            callback("submitted successfully");
         }
     }, 
     // 3. Callback for errors
@@ -386,14 +369,14 @@ invokeChaincode = async(callback) => {
 /**
  * Demonstrates the use of query by chaincode
  */
-queryChaincode = async () =>{
+queryChaincode = async (fcn,args,callback) =>{
     // Execute the query
     try{
     chaincodes = await channel.queryByChaincode({
-        targets: PEER_NAME,
+       // targets: USER_NAME,
         chaincodeId: CHAINCODE_ID,
-        fcn: 'getOrder',
-        args: ['trade-1']
+        fcn,
+        args
     })
     }
     catch(err){
@@ -407,10 +390,10 @@ queryChaincode = async () =>{
     //     fcn: 'query',
     //     args: ['b']
     // })
-    res =` ${chaincodes[0].toString("utf8")}`;
+    res =`${chaincodes[0].toString("utf8")}`;
     console.log("queryChaincode=> ",res)
 
-  //  callback(res);
+    callback(res);
 }
 
 

@@ -1,19 +1,19 @@
 # Sample YAML for client config
-name: "Budget Client"
+name: "DevOrg Client"
 version: "1.0"
-description: "Client section for Budget"
+description: "Client section for DevOrg"
 
 # Client section describes the client
 client:
   # Org name
-  organization: budget
+  organization: DevOrg
   # User context storage
   credentialStore:
     # State
-    path: "./credstore/budget/hfc-kvs"
+    path: "./credstore/DevOrg/hfc-kvs"
     # Public & Private key
     cryptoStore:
-      path: "./credstore/budget/hfc-cvs"
+      path: "./credstore/DevOrg/hfc-cvs"
 
   #GRPC options
   connection:

@@ -1,5 +1,5 @@
 
-const client = require("./fabric_client");
+const client = require("./fabric_client_dev");
 const bodyParser = require('body-parser');
 const express = require('express');
 const path = require('path');
@@ -19,9 +19,9 @@ app.get('/', function(req, res) {
 });
 
  app.get('/query', (req, res) => {
-    console.log("query" );
+    console.log("query => " + req.body.fcn + "|args:" + req.body.args );
 
-    client.queryERC20( (data) => {
+    client.queryChaincode( req.body.fcn, req.body.args, (data) => {
         res.send(data);
     });
 
@@ -30,7 +30,7 @@ app.get('/', function(req, res) {
  app.post('/invoke', (req, res) => {
     console.log("invoke = ",req.body );
 
-    client.invokeChaincode( (data)=> {
+    client.invokeChaincode( req.body.fcn, req.body.args, (data)=> {
         res.send(data);
     });
 

@@ -723,7 +723,7 @@ func (t *TradeWorkflowChaincode) acceptOrder(stub shim.ChaincodeStubInterface, c
 	}
 
 	if tradeAgreement.Status != REQUESTED {
-		fmt.Printf("Trade %s is already  ACCEPTED", args[0])
+		fmt.Printf("Trade %s is already  ACCEPTED\n", args[0])
 		return shim.Error(fmt.Sprintf("Trade %s is already ACCEPTED", args[0]))
 	} else {
 		tradeAgreement.Status = ACCEPTED
