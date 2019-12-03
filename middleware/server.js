@@ -10,7 +10,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
+
 app.use(express.static(path.join(__dirname, 'build')));
+
+app.use(function (req, res, next) {
+
+   // Website you wish to allow to connect
+   res.setHeader('Access-Control-Allow-Origin', '*');
+   res.setHeader('Access-Control-Allow-Headers', '*');
+   
+  // express.static(path.join(__dirname, 'build'))
+  next()
+})
 
 app.get('/', function(req, res) {
    // res.sendFile(path.join(__dirname, 'build', 'index.html'));
@@ -19,9 +30,10 @@ app.get('/', function(req, res) {
 });
 
  app.get('/query', (req, res) => {
-    console.log("query => " + req.body.fcn + "|args:" + req.body.args );
+    console.log("query => " + req.query.fcn + "|args:" + req.query.args );
 
-    client.queryChaincode( req.body.fcn, req.body.args, (data) => {
+
+    client.queryChaincode( req.query.fcn, req.query.args, (data) => {
         res.send(data);
     });
 
