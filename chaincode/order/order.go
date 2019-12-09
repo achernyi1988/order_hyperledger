@@ -40,32 +40,6 @@ func (t *TradeWorkflowChaincode) Init(stub shim.ChaincodeStubInterface) pb.Respo
 	//_, args := stub.GetFunctionAndParameters()
 	var err error
 
-	// if len(args) != 1 {
-	// 	err = errors.New(fmt.Sprintf("Incorrect number of arguments. Expecting 8: {"+
-	// 		"Exporter, "+
-	// 		"Exporter's Bank, "+
-	// 		"Exporter's Account Balance, "+
-	// 		"Importer, "+
-	// 		"Importer's Bank, "+
-	// 		"Importer's Account Balance, "+
-	// 		"Carrier, "+
-	// 		"Regulatory Authority"+
-	// 		"}. Found %d", len(args)))
-	// 	return shim.Error(err.Error())
-	// }
-
-	// // Type checks
-	// _, err = strconv.Atoi(string(args[2]))
-	// if err != nil {
-	// 	fmt.Printf("Exporter's account balance must be an integer. Found %s\n", args[2])
-	// 	return shim.Error(err.Error())
-	// }
-	// _, err = strconv.Atoi(string(args[5]))
-	// if err != nil {
-	// 	fmt.Printf("Importer's account balance must be an integer. Found %s\n", args[5])
-	// 	return shim.Error(err.Error())
-	// }
-
 	err = stub.PutState(ImporterBalance, []byte("20000"))
 	if err != nil {
 		fmt.Println(fmt.Errorf("Error recording key %s: %s\n", ImporterBalance, err.Error()))
@@ -164,7 +138,7 @@ func (t *TradeWorkflowChaincode) getBalance(stub shim.ChaincodeStubInterface, cr
 
 	fmt.Printf("%s balance %.2f \n", funcName(), balance)
 
-	return shim.Success([]byte(fmt.Sprintf("balance:%.2f", balance)))
+	return shim.Success([]byte(fmt.Sprintf("|%s?" , args[0] ) + fmt.Sprintf("%.2f", balance)))
 }
 
 func (t *TradeWorkflowChaincode) getOrder(stub shim.ChaincodeStubInterface, creatorOrg string, creatorCertIssuer string, args []string) pb.Response {
@@ -196,14 +170,15 @@ func (t *TradeWorkflowChaincode) getOrder(stub shim.ChaincodeStubInterface, crea
 	}
 	fmt.Printf("%s %+v\n", funcName(), tradeAgreement)
 
-	fmt.Printf("%s DescriptionOfGoods[%s] Amount[%.2f] Payment [%.2f] Numbers [%d] Status[%s]\n", funcName(),
+	fmt.Printf("%s?DescriptionOfGoods[%s] Amount[%.2f] Payment [%.2f] Numbers [%d] Status[%s]\n", funcName(),
 		tradeAgreement.DescriptionOfGoods, tradeAgreement.Amount, tradeAgreement.Payment,
 		tradeAgreement.Numbers, tradeAgreement.Status)
 
-	return shim.Success([]byte(tradeAgreement.DescriptionOfGoods + "/Amount " +
-		fmt.Sprintf("%.2f", tradeAgreement.Amount) + "/Payment " +
-		fmt.Sprintf("%.2f", tradeAgreement.Payment) + "/Status " +
-		tradeAgreement.Status))
+	return shim.Success([]byte("|Description?" + tradeAgreement.DescriptionOfGoods + "|Amount?" +
+		fmt.Sprintf("%.2f", tradeAgreement.Amount) + "|Payment?" +
+		fmt.Sprintf("%.2f", tradeAgreement.Payment) + "|Status?" +
+		tradeAgreement.Status + "|NUMBER?" + 
+		strconv.Itoa(tradeAgreement.Numbers)))
 }
 
 func (t *TradeWorkflowChaincode) getShipment(stub shim.ChaincodeStubInterface, creatorOrg string, creatorCertIssuer string, args []string) pb.Response {
@@ -238,11 +213,12 @@ func (t *TradeWorkflowChaincode) getShipment(stub shim.ChaincodeStubInterface, c
 	fmt.Printf("%s TradeId[%s] current location [%s] \n", funcName(),
 		shipmentDelivery.TradeId, shipmentDelivery.Location)
 
-	return shim.Success([]byte(shipmentDelivery.TradeId +
-		"/SourcePort " + shipmentDelivery.SourcePort +
-		"/DestinationPort " + shipmentDelivery.DestinationPort +
-		"/Current Location " + shipmentDelivery.Location +
-		"/EndDate " + shipmentDelivery.EndDate))
+	return shim.Success([]byte(
+		"|TradeId?" + shipmentDelivery.TradeId +
+		"|SourcePort?" + shipmentDelivery.SourcePort +
+		"|DestinationPort?" + shipmentDelivery.DestinationPort +
+		"|Current Location?" + shipmentDelivery.Location +
+		"|EndDate?" + shipmentDelivery.EndDate))
 }
 
 // Request a trade agreement
@@ -298,7 +274,7 @@ func (t *TradeWorkflowChaincode) requestOrder(stub shim.ChaincodeStubInterface, 
 	}
 	fmt.Printf("Trade %s request recorded\n", args[0])
 
-	return shim.Success(nil)
+	return shim.Success([]byte(tradeAgreement.Status))
 }
 
 func (t *TradeWorkflowChaincode) reset(stub shim.ChaincodeStubInterface, creatorOrg string, creatorCertIssuer string, args []string) pb.Response {
@@ -382,10 +358,13 @@ func (t *TradeWorkflowChaincode) updateShipmentLocation(stub shim.ChaincodeStubI
 	}
 
 	shipmentDelivery.Location = args[1]
-
+	var tradeAgreement *TradeAgreement
 	//update
 	if shipmentDelivery.Location == shipmentDelivery.DestinationPort {
-		deliverCargo(stub, args[0])
+		tradeAgreement, err = deliverCargo(stub, args[0])
+		if err != nil{
+			return shim.Error(err.Error())
+		}
 	}
 
 	shipmentDeliveryBytes, err = json.Marshal(shipmentDelivery)
@@ -400,7 +379,7 @@ func (t *TradeWorkflowChaincode) updateShipmentLocation(stub shim.ChaincodeStubI
 		return shim.Error(err.Error())
 	}
 
-	return shim.Success(nil)
+	return shim.Success([]byte(tradeAgreement.Status))
 }
 
 func (t *TradeWorkflowChaincode) prepareShipment(stub shim.ChaincodeStubInterface, creatorOrg string, creatorCertIssuer string, args []string) pb.Response {
@@ -481,7 +460,7 @@ func (t *TradeWorkflowChaincode) prepareShipment(stub shim.ChaincodeStubInterfac
 
 	fmt.Printf("%s request recorded orderKey [%s] shipmentKey[%s]\n", funcName(), args[0], shipmentKey)
 
-	return shim.Success(nil)
+	return shim.Success([]byte(tradeAgreement.Status))
 }
 
 //make full payment
@@ -582,7 +561,7 @@ func (t *TradeWorkflowChaincode) makePayment(stub shim.ChaincodeStubInterface, c
 
 	fmt.Printf("Trade %s make prepayment recorded\n", args[0])
 
-	return shim.Success(nil)
+	return shim.Success([]byte(tradeAgreement.Status))
 }
 
 func (t *TradeWorkflowChaincode) makePrepayment(stub shim.ChaincodeStubInterface, creatorOrg string, creatorCertIssuer string, args []string) pb.Response {
@@ -681,7 +660,7 @@ func (t *TradeWorkflowChaincode) makePrepayment(stub shim.ChaincodeStubInterface
 
 	fmt.Printf("Trade %s make prepayment recorded\n", args[0])
 
-	return shim.Success(nil)
+	return shim.Success([]byte(tradeAgreement.Status))
 }
 
 // Accept a trade agreement
@@ -739,11 +718,11 @@ func (t *TradeWorkflowChaincode) acceptOrder(stub shim.ChaincodeStubInterface, c
 	}
 	fmt.Printf("Trade %s acceptance recorded\n", args[0])
 
-	return shim.Success(nil)
+	return shim.Success([]byte(tradeAgreement.Status))
 }
 
 //private method
-func deliverCargo(stub shim.ChaincodeStubInterface, orderId string) pb.Response {
+func deliverCargo(stub shim.ChaincodeStubInterface, orderId string) ( *TradeAgreement, error) {
 	var orderKey string
 	var tradeAgreement *TradeAgreement
 	var tradeAgreementBytes []byte
@@ -751,34 +730,34 @@ func deliverCargo(stub shim.ChaincodeStubInterface, orderId string) pb.Response 
 
 	orderKey, err = getOrderKey(stub, orderId)
 	if err != nil {
-		return shim.Error(err.Error())
+		return nil, err
 	}
 
 	//update trade's status
 	tradeAgreementBytes, err = stub.GetState(orderKey)
 	if err != nil {
-		return shim.Error(err.Error())
+		return nil, err
 	}
 
 	err = json.Unmarshal(tradeAgreementBytes, &tradeAgreement)
 	if err != nil {
-		return shim.Error("Error unmarshaling tradeAgreement structure")
+		return nil,  errors.New("Error unmarshaling tradeAgreement structure")
 	}
 
 	tradeAgreement.Status = DELIVERED
 
 	tradeAgreementBytes, err = json.Marshal(&tradeAgreement)
 	if err != nil {
-		return shim.Error("Error unmarshaling tradeAgreement structure")
+		return nil, errors.New("Error unmarshaling tradeAgreement structure")
 	}
 
 	err = stub.PutState(orderKey, tradeAgreementBytes)
 
 	if err != nil {
-		return shim.Error(err.Error())
+		return nil,  err
 	}
 
-	return shim.Success(nil)
+	return tradeAgreement, nil
 }
 
 func main() {

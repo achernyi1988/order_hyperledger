@@ -269,7 +269,9 @@ invokeChaincode = async(fcn,args, callback) => {
     // Original proposal @ index = 1
     var proposal = results[1];
     
-    console.log("print",results[0][0].message);
+    var responseStatus = results[0][0].response.payload.toString('utf-8')
+
+    console.log("print",responseStatus);
 
     // #2 Loop through responses to check if they are good
     var all_good = true;
@@ -288,7 +290,7 @@ invokeChaincode = async(fcn,args, callback) => {
     console.log("#2 Looped through the EP results  all_good=",all_good)
 
     // #3 Setup the TX listener
-    await setupTxListener(tx_id_string, callback)
+    await setupTxListener(tx_id_string, callback, responseStatus)
     console.log('#3 Registered the Tx Listener')
 
     // Broadcast request
@@ -312,7 +314,7 @@ invokeChaincode = async(fcn,args, callback) => {
  * 
  * #5. Print message in call back of event listener
  */
- function setupTxListener(tx_id_string, callback){
+ function setupTxListener(tx_id_string, callback, responseStatus){
 
     // 1. Get the event hub for the named peer
     let event_hub = channel.getChannelEventHub(PEER_NAME);
@@ -348,7 +350,7 @@ invokeChaincode = async(fcn,args, callback) => {
         } else {
             shouldUnregister = false;
             console.log('\tThe invoke chaincode transaction was VALID.');
-            callback("submitted successfully");
+            callback(responseStatus);
         }
     }, 
     // 3. Callback for errors
