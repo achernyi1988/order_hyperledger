@@ -1,0 +1,25 @@
+.transitionStep {
+    filter: grayscale(1);
+}
+
+.transitionStep.accomplished {
+    filter: grayscale(0);
+}
+
+.btn {
+    padding: 0;
+    border:none;
+    outline:none;
+    background:none;
+}
+
+.active{
+    cursor:pointer;
+    color: #4183c4;
+    font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
+    font-size: 1.14285714em;
+    font-weight: 700;
+}
+.inactive{
+    color: rgba(40,40,40,.3);
+}
