@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/hyperledger/fabric-chaincode-go/shim"
 )
 
 func funcName() string {
@@ -31,6 +31,15 @@ func getOrderKey(stub shim.ChaincodeStubInterface, id string) (string, error) {
 	}
 }
 
+func getBalanceKey(stub shim.ChaincodeStubInterface, id string) (string, error) {
+	orderKey, err := stub.CreateCompositeKey("Balance", []string{id})
+	if err != nil {
+		return "", err
+	} else {
+		return orderKey, nil
+	}
+}
+
 func getShipmentKey(stub shim.ChaincodeStubInterface, id string) (string, error) {
 	orderKey, err := stub.CreateCompositeKey("Shipment", []string{id})
 	if err != nil {
@@ -38,4 +47,22 @@ func getShipmentKey(stub shim.ChaincodeStubInterface, id string) (string, error)
 	} else {
 		return orderKey, nil
 	}
+
+}
+
+func splitCompositeKey(stub shim.ChaincodeStubInterface, id string) (string, error) {
+	_, keys, err := stub.SplitCompositeKey(id)
+
+	fmt.Printf("keys[%#v]\n", keys)
+
+	if err != nil {
+		return "", err
+	}
+	var str = ""
+	for _, s := range keys {
+		str += s
+	}
+
+	return str, nil
+
 }

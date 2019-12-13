@@ -63,17 +63,32 @@ app.get('/', function(req, res) {
  
       console.log(obj);
       res.send(obj);
-      // str2 = splitStr(str[1], '?'); 
-
-      // console.log("str2 =>", str2)
-
-      // obj[str2[0]] = str2[1]
-      // obj["Amount"] = str[2]
-
-   
     });
 
  });
+
+
+ app.get('/queryAll', (req, res) => {
+      console.log("queryAll => " + req.query.fcn + " args: " +req.query.args);
+
+      client.queryChaincode( req.query.fcn, req.query.args, (data) => {
+         
+      let array = JSON.parse(data)   
+
+      // console.log(array[0].key);
+
+      // console.log(array[0].value.amount);
+
+      // var obj = new Object();
+
+
+      res.send(array);
+   });
+
+});
+
+ 
+
 
  app.post('/invoke', (req, res) => {
     console.log("invoke = ",req.body );
@@ -88,70 +103,10 @@ app.get('/', function(req, res) {
     console.log("switchAccount = ",req.body );
 
     let data = await client.switchAccount(req.body.org, req.body.user );
-
+   
     res.send(data);
 
  });
-
-
-
-
-// app.post('/vote', (req, res) => {
-//     console.log("vote", req.body.candidate, req.body.electorate );
-
-//     const {candidate, electorate} = req.body;
-
-//     proxy.vote(candidate, electorate, function (result) {
-
-//         console.log("vote result" , result );
-//         res.send(true);
-//     });
-
-// });
-
-
-// app.get('/getIPFSHash', (req, res) => {
-//     console.log("getIPFSHash" );
-//     proxy.getIPFSHash(function (data) {
-//         res.send(data);
-//     });
-// });
-
-// app.post('/setIPFSHash', (req, res) => {
-//     console.log("setIPFSHash" );
-//     proxy.setIPFSHash(req.body.hash, function (data) {
-//         res.send(data);
-//     });
-// });
-
-
-// app.get('/getContractAddress', (req, res) => {
-//     console.log("getContractAddress" );
-//     proxy.getContractAddress(function (data) {
-//         res.send(data);
-//     });
-// });
-
-// app.get('/getElectorateVoted', (req, res) => {
-//     console.log("getElectorateVoted" );
-//     proxy.getElectorateVoted(function (data) {
-//         res.send(data);
-//     });
-// });
-
-// app.get('/getCandidates', (req, res) => {
-//     console.log("getCandidates" );
-//     proxy.getCandidates(function (data) {
-//         res.send(data);
-//     });
-// });
-
-// app.get('/getElectionResult', (req, res) => {
-//     console.log("getElectionResult" );
-//     proxy.getElectionResult(function (data) {
-//         res.send(data);
-//     });
-// });
 
 app.listen(port,(err) =>{
     if(err)  throw err;

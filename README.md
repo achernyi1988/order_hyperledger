@@ -39,7 +39,7 @@ peer chaincode upgrade -o orderer.trade.com:7050 -C tradechannel -n test  -c '{"
 ----------------------------DEV-----------------------------------
 
 1) first console
-CORE_PEER_ADDRESS=127.0.0.1:7052 CORE_CHAINCODE_ID_NAME=test:1 go run /blockchain/hyperledger/book_2019/src/trade-finance-logistics/order_hyperledger/chaincode/order/*.go
+CORE_CHAINCODE_ID_NAME=test:1 CORE_PEER_TLS_ENABLED=false go run /blockchain/hyperledger/book_2019/src/trade-finance-logistics/order_hyperledger/chaincode/order/*.go -peer.address peer:7052
 
 2) second console
 export CORE_PEER_MSPCONFIGPATH=/blockchain/hyperledger/book_2019/src/trade-finance-logistics/order_hyperledger/network/devmode/crypto-config/peerOrganizations/devorg.trade.com/users/Admin@devorg.trade.com/msp/
@@ -65,6 +65,8 @@ peer chaincode invoke -n test -c '{"Args":["makePayment","trade-1"]}' -C tradech
 peer chaincode invoke -n test -c '{"Args":["reset","trade-1"]}' -C tradechannel
 
 peer chaincode invoke -n test -c '{"Args":["getOrder","trade-1"]}' -C tradechannel
+peer chaincode invoke -n test -c '{"Args":["getAllOrders",""]}' -C tradechannel
+
 peer chaincode invoke -n test -c '{"Args":["getShipment","trade-1"]}' -C tradechannel
 
 peer chaincode invoke -n test -c '{"Args":["getBalance","ImporterBalance"]}' -C tradechannel

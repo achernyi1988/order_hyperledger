@@ -2,6 +2,6 @@
 
 chaincode/order/vendor/*
 middleware/node_modules/*
-middleware/credstore/exporter_client/*
+middleware/credstore/*
 
  
