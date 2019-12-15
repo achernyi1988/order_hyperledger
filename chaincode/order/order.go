@@ -153,28 +153,16 @@ func (t *TradeWorkflowChaincode) getAllOrders(stub shim.ChaincodeStubInterface, 
 		if bItemAlreadyWritten {
 			buffer.WriteString(",")
 		}
-		//	buffer.WriteString("{")
-		//buffer.WriteString("{\"key\":")
-		//buffer.WriteString("\"")
 
 		key, err := splitCompositeKey(stub, queryResponse.Key)
 		if err != nil {
-			//	fmt.Printf("%s \n", err.Error())
+			fmt.Printf("%s \n", err.Error())
 			continue
 		}
-		//buffer.WriteString(key)
-		//	buffer.WriteString("\"")
 
-		//	buffer.WriteString(", \"value\":")
-		// Record is a JSON object, so we write as-is
-
-		var m map[string]interface{}
-		json.Unmarshal(queryResponse.Value, &m)
-		m["key"] = key
-		newData, err := json.Marshal(m)
+		newData, _ := appendValue("key", key, queryResponse.Value)
 
 		buffer.WriteString(string(newData))
-		//	buffer.WriteString("}")
 		bItemAlreadyWritten = true
 	}
 	buffer.WriteString("]")
@@ -221,14 +209,9 @@ func (t *TradeWorkflowChaincode) getHistoryByKey(stub shim.ChaincodeStubInterfac
 			buffer.WriteString(",")
 		}
 
-		buffer.WriteString("{\"TxId\":")
+		buffer.WriteString("{\"txId\":")
 		buffer.WriteString("\"")
 
-		// key, err := splitCompositeKey(stub, queryResponse.Key)
-		// if err != nil {
-		// 	fmt.Printf("%s \n", err.Error())
-		// 	continue
-		// }
 		buffer.WriteString(queryResponse.TxId)
 		buffer.WriteString("\"")
 
@@ -247,7 +230,6 @@ func (t *TradeWorkflowChaincode) getHistoryByKey(stub shim.ChaincodeStubInterfac
 
 	fmt.Printf("%s \n", buffer.String())
 	return shim.Success(buffer.Bytes())
-	//return shim.Success(nil)
 }
 
 func (t *TradeWorkflowChaincode) getBalance(stub shim.ChaincodeStubInterface, creatorOrg string, creatorCertIssuer string, args []string) pb.Response {
@@ -311,10 +293,7 @@ func (t *TradeWorkflowChaincode) getOrder(stub shim.ChaincodeStubInterface, crea
 
 	jsonData, err := json.Marshal(tradeAgreement)
 
-	var m map[string]interface{}
-	json.Unmarshal(jsonData, &m)
-	m["id"] = args[0]
-	newData, err := json.Marshal(m)
+	newData, _ := appendValue("key", args[0], jsonData)
 
 	return shim.Success([]byte(newData))
 }

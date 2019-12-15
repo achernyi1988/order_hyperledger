@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"runtime"
@@ -65,4 +66,12 @@ func splitCompositeKey(stub shim.ChaincodeStubInterface, id string) (string, err
 
 	return str, nil
 
+}
+
+func appendValue(key string, value string, array []byte) ([]byte, error) {
+	var m map[string]interface{}
+	json.Unmarshal(array, &m)
+	m[key] = value
+	newData, err := json.Marshal(m)
+	return newData, err
 }
