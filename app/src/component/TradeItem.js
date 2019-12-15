@@ -43,6 +43,11 @@ class TradeItem extends React.Component {
         });
     }
 
+    getHistory = () =>{
+        history.push(`/history/${this.id}`);
+    }
+
+
     invoke = (fcn, args) => {
 
         return invoke(fcn, args)
@@ -100,6 +105,9 @@ class TradeItem extends React.Component {
                 </button>
                 <button className="ui negative button" onClick={this.reset}>
                     Reset
+                </button>
+                <button className="ui button" onClick={this.getHistory}>
+                    GetHistory
                 </button>
             </div>
         )
