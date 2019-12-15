@@ -2,17 +2,14 @@ import React from 'react';
 import TradeList from "./component/TradeList";
 import TradeItem from "./component/TradeItem";
 import Header from "./component/Header";
+import CreateForm from "./component/CreateForm";
+
 import {Router, Route, Switch} from "react-router-dom"
 import history from "./history"
 
-class App extends React.Component {
+const  App  = () => {
 
 
-    componentDidMount() {
-        console.log("componentDidMount");
-    }
-
-    render() {
         return (
             <div className="ui container">
                 <Router history={history}>
@@ -20,11 +17,12 @@ class App extends React.Component {
                      <Switch>
                          <Route path={"/"} exact component={TradeList}/>
                          <Route path={"/trades/:id"} exact component={TradeItem}/>
+                         <Route path={"/create"} exact component={CreateForm}/>
+
                      </Switch>
                 </Router>
             </div>
         );
-    }
 
 }
 

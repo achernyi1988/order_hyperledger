@@ -1,56 +1,49 @@
 import React from 'react';
-import {Link} from "react-router-dom"
-import axios from "../api/axios"
-//import {getStatus, setStatus} from "../helper/helper";
+import {query} from "../api/axios"
+import Card from "./Card"
 
 class TradeList extends React.Component {
 
     state = {
-        list: null
+        list: null,
+        error: ""
     }
 
     componentDidMount() {
-        console.log("componentDidMount");
 
-
-        axios.get("/queryAll",
-            {
-                params: {
-                    fcn: "getAllOrders",
-                    args: ["Order"]
-                }
-            })
+        query("/query", "getAllOrders", ["Order"])
             .then((response) => {
                 console.log("TradeList::getAll= ", response.data)
-                this.setState({list:response.data})
+                this.setState({list: response.data, error: ""})
             })
-            .catch(function (error) {
-                console.log(error);
+            .catch ((error) => {
+                console.log(error.toString());
+                this.setState({error:error.toString()})
             })
 
     }
 
     renderList = () => {
-        return this.state.list.map(trade => {
-            return (
-                <div className="item" key={trade.key}>
-                    <Link to={`trades/${trade.key}`} className="header">
-                        {trade.key}
-                    </Link>
-                    <div className="description">{trade.description}</div>
-                </div>
-
-            )
-        })
-    }
-
-    render() {
         if (!this.state.list) {
             return null;
         }
 
+        return this.state.list.map(trade => {
+            return (
+                <Card trade = {trade} key={trade.key}/>
+            )
+        })
+    }
+    renderError = () => {
+        return (<div>
+                    {this.state.error}
+                </div>)
+    }
+
+    render() {
         return (
             <div className="ui container">
+                {this.renderError()}
                 {this.renderList()}
             </div>
         );

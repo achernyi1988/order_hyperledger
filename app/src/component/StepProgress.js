@@ -20,8 +20,7 @@ const StepProgress = ((props) => {
             <div className={status.REQUESTED}>
                 <i className="shopping basket icon"></i>
                 <div className="content">
-                    <button className={REQUESTED_ACTIVE ? "btn active": "btn inactive"}
-                            onClick={REQUESTED_ACTIVE ? props.onRequestOrder : null}>
+                    <button className={REQUESTED_ACTIVE ? "btn active": "btn inactive"}>
                         {"Request an order"}
                     </button>
                     <div className="description">Buyer</div>

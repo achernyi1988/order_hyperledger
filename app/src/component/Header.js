@@ -7,6 +7,9 @@ class Header extends Component {
         return (
             <div className={"ui secondary pointing menu"}>
                 <Link className={"item"} to={"/"}> Anytime Buys </Link>
+                <div className={"  compact  menu"}>
+                    <Link className={"  item"} to={"/create"}> Create Trade </Link>
+                </div>
                 <div className={"right menu"}>
                     <Link className={"item"} to={"/"}> All Trades </Link>
                 </div>

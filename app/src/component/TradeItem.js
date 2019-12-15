@@ -1,8 +1,8 @@
 import React from 'react';
-import axios from "../api/axios"
+import {query, invoke} from "../api/axios"
 import StepProgress from "./StepProgress"
 import ProgressStatus from "../helper/helper"
-
+import history from "../history"
 
 class TradeItem extends React.Component {
 
@@ -16,18 +16,12 @@ class TradeItem extends React.Component {
         console.log("componentDidMount", this.props.match.params.id);
 
         console.log("componentDidMount status = ", ProgressStatus.getStatus());
-        this.name = this.props.match.params.id;
+        this.id = (this.props.match.params.id);
         this.getTrade();
     }
 
     getTrade = () => {
-        axios.get("/query",
-            {
-                params: {
-                    fcn: "getOrder",
-                    args: [this.name]
-                }
-            })
+         query("/query", "getOrder", [this.id])
             .then((response) => {
                 console.log("get= ", response.data)
 
@@ -36,73 +30,69 @@ class TradeItem extends React.Component {
             })
             .catch(function (error) {
                 console.log(error);
-            })
+            });
     }
 
     reset = () => {
         console.log("TradeItem::reset");
-        this.invoke("reset", [this.name]);
+        this.invoke("reset", [this.id])
+            .then (()=>{
+            history.push("/");
+        }).catch( (error) => {
+            console.log(error);
+        });
     }
 
-    invoke=(fcn, args)=>{
-        axios.post("/invoke",
-            {fcn, args})
-            .then((res)=>{
-                console.log("post= ", res)
+    invoke = (fcn, args) => {
 
+        return invoke(fcn, args)
+            .then((res) => {
+                console.log("post= ", res)
                 ProgressStatus.setStatus(res.data.status)
                 this.setState({status: ProgressStatus.getStatus()});
-
             }).catch(function (error) {
             console.log(error);
         })
     }
 
-    onRequestOrder = ()=>{
-        console.log("TradeItem::requestOrder");
-        this.invoke("requestOrder", [this.name,"17000","solar battery: Risen rsm 144-6-390m half-cell","187"]);
-    }
-
     onAcceptOrder = (value) => {
         console.log("TradeItem::onAcceptOrder", value);
 
-        this.invoke("acceptOrder", [this.name]);
+        this.invoke("acceptOrder", [this.id]);
     }
 
     onPrepayment = () => {
         console.log("TradeItem::makePrepayment");
 
-        this.invoke("makePrepayment", [this.name]);
+        this.invoke("makePrepayment", [this.id]);
     }
 
-    onSetoff =()=>{
+    onSetoff = () => {
         console.log("TradeItem::prepareShipment");
-        this.invoke("prepareShipment", [this.name,"Shanghai","Odessa","Shanghai","19.02.2020","20.03.2020"]);
+        this.invoke("prepareShipment", [this.id, "Shanghai", "Odessa", "Shanghai", "19.02.2020", "20.03.2020"]);
     }
 
-    onUpdateLocation = () =>{
+    onUpdateLocation = () => {
         console.log("TradeItem::updateShipmentLocation");
-        this.invoke("updateShipmentLocation", [this.name,"Odessa"]);
+        this.invoke("updateShipmentLocation", [this.id, "Odessa"]);
     }
 
-    onFullPay = ( ) => {
+    onFullPay = () => {
         console.log("TradeItem::makePayment");
-        this.invoke("makePayment", [this.name]);
+        this.invoke("makePayment", [this.id]);
     }
 
-    render()
-    {
+    render() {
 
         if (!this.state.status) {
             return null;
         }
-console.log("render",this.state.status );
         return (
             <div>
                 <StepProgress status={this.state.status}
-                              onRequestOrder = {this.onRequestOrder} onAcceptOrder={this.onAcceptOrder}
-                              onPrepayment = {this.onPrepayment} onSetoff = {this.onSetoff}
-                              onUpdateLocation = {this.onUpdateLocation} onFullPay = {this.onFullPay}
+                              onAcceptOrder={this.onAcceptOrder}
+                              onPrepayment={this.onPrepayment} onSetoff={this.onSetoff}
+                              onUpdateLocation={this.onUpdateLocation} onFullPay={this.onFullPay}
                 />
 
                 <button className="ui primary button" onClick={this.getTrade}>
