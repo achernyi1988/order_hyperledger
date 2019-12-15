@@ -18,7 +18,7 @@ package main
 
 type TradeAgreement struct {
 	Amount             float64 `json:"amount"`
-	DescriptionOfGoods string  `json:"descriptionOfGoods"`
+	DescriptionOfGoods string  `json:"description"`
 	Status             string  `json:"status"`
 	Payment            float64 `json:"payment"`
 	Numbers            int     `json:"numbers"`

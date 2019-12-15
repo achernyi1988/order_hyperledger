@@ -153,25 +153,33 @@ func (t *TradeWorkflowChaincode) getAllOrders(stub shim.ChaincodeStubInterface, 
 		if bItemAlreadyWritten {
 			buffer.WriteString(",")
 		}
-
-		buffer.WriteString("{\"key\":")
-		buffer.WriteString("\"")
+		//	buffer.WriteString("{")
+		//buffer.WriteString("{\"key\":")
+		//buffer.WriteString("\"")
 
 		key, err := splitCompositeKey(stub, queryResponse.Key)
 		if err != nil {
-			fmt.Printf("%s \n", err.Error())
+			//	fmt.Printf("%s \n", err.Error())
 			continue
 		}
-		buffer.WriteString(key)
-		buffer.WriteString("\"")
+		//buffer.WriteString(key)
+		//	buffer.WriteString("\"")
 
-		buffer.WriteString(", \"value\":")
+		//	buffer.WriteString(", \"value\":")
 		// Record is a JSON object, so we write as-is
-		buffer.WriteString(string(queryResponse.Value))
-		buffer.WriteString("}")
+
+		var m map[string]interface{}
+		json.Unmarshal(queryResponse.Value, &m)
+		m["key"] = key
+		newData, err := json.Marshal(m)
+
+		buffer.WriteString(string(newData))
+		//	buffer.WriteString("}")
 		bItemAlreadyWritten = true
 	}
 	buffer.WriteString("]")
+
+	fmt.Printf("%s\n", buffer.String())
 
 	return shim.Success(buffer.Bytes())
 	//return shim.Success(nil)
@@ -301,13 +309,14 @@ func (t *TradeWorkflowChaincode) getOrder(stub shim.ChaincodeStubInterface, crea
 		tradeAgreement.DescriptionOfGoods, tradeAgreement.Amount, tradeAgreement.Payment,
 		tradeAgreement.Numbers, tradeAgreement.Status)
 
-	return shim.Success([]byte(
-		"|id?" + args[0] +
-			"|description?" + tradeAgreement.DescriptionOfGoods + "|amount?" +
-			fmt.Sprintf("%.2f", tradeAgreement.Amount) + "|payment?" +
-			fmt.Sprintf("%.2f", tradeAgreement.Payment) + "|status?" +
-			tradeAgreement.Status + "|number?" +
-			strconv.Itoa(tradeAgreement.Numbers)))
+	jsonData, err := json.Marshal(tradeAgreement)
+
+	var m map[string]interface{}
+	json.Unmarshal(jsonData, &m)
+	m["id"] = args[0]
+	newData, err := json.Marshal(m)
+
+	return shim.Success([]byte(newData))
 }
 
 func (t *TradeWorkflowChaincode) getShipment(stub shim.ChaincodeStubInterface, creatorOrg string, creatorCertIssuer string, args []string) pb.Response {

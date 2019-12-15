@@ -46,7 +46,7 @@ export CORE_PEER_MSPCONFIGPATH=/blockchain/hyperledger/book_2019/src/trade-finan
 export CORE_PEER_ADDRESS=peer:7051
 export CORE_PEER_LOCALMSPID=DevOrgMSP
 
-peer chaincode install -n test -p trade-finance-logistics/chaincode/src/github.com/order  -v 1
+peer chaincode install -n test -p trade-finance-logistics/order_hyperledger/chaincode/order  -v 1
 peer chaincode instantiate -C tradechannel -n test -c '{"Args":["init"]}' -o orderer.trade.com:7050 -v 1
 
 peer chaincode upgrade -o orderer.trade.com:7050 -C tradechannel -n test  -c '{"Args":["init"]}' -v 1

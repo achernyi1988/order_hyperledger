@@ -23,15 +23,6 @@ app.use(function (req, res, next) {
   next()
 })
 
-function splitStr(str, seperator) { 
-      
-   // Function to split string 
-   var string = str.split(seperator); 
-     
-   //console.log(string); 
-   return string
-} 
-
 app.get('/', function(req, res) {
    // res.sendFile(path.join(__dirname, 'build', 'index.html'));
    console.log("server is running" );
@@ -41,60 +32,25 @@ app.get('/', function(req, res) {
  app.get('/query', (req, res) => {
     console.log("query => " + req.query.fcn + "|args:" + req.query.args );
 
-
-    client.queryChaincode( req.query.fcn, req.query.args, (data) => {
-
-      //split to array
-      arrayStr = splitStr(data, '|'); 
-
-      var obj = new Object();
- 
-      arrayStr.forEach(element => {
-         if(element === ""){
-            return;
-         }
-         //split to instance
-         instance = splitStr(element, '?')
-
-         console.log("instance=>", instance)
-
-         obj[instance[0]] = instance[1]
-      });
- 
-      console.log(obj);
-      res.send(obj);
-    });
-
- });
-
-
- app.get('/queryAll', (req, res) => {
-      console.log("queryAll => " + req.query.fcn + " args: " +req.query.args);
-
       client.queryChaincode( req.query.fcn, req.query.args, (data) => {
-         
-      let array = JSON.parse(data)   
 
-      // console.log(array[0].key);
-
-      // console.log(array[0].value.amount);
-
-      // var obj = new Object();
-
-
-      res.send(array);
-   });
-
-});
-
- 
-
+      console.log(data);
+      res.send(JSON.parse(data));
+    });
+ });
 
  app.post('/invoke', (req, res) => {
     console.log("invoke = ",req.body );
 
-    client.invokeChaincode( req.body.fcn, req.body.args, (responseStatus)=> {
-        res.send({status:responseStatus});
+    client.invokeChaincode( req.body.fcn, req.body.args, (responseStatus, err)=> {
+       if(err){
+         return res.status(500).json({
+            message: responseStatus,
+          })
+       } 
+      
+       res.send({status:responseStatus});
+       
     });
 
  });
