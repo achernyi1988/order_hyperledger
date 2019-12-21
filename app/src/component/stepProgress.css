@@ -23,3 +23,7 @@
 .inactive{
     color: rgba(40,40,40,.3);
 }
+
+.errorText{
+    color: red;
+}

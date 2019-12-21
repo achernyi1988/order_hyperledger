@@ -35,7 +35,7 @@ class TradeList extends React.Component {
         })
     }
     renderError = () => {
-        return (<div>
+        return (<div className="errorText">
                     {this.state.error}
                 </div>)
     }

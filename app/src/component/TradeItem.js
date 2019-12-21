@@ -7,7 +7,8 @@ import history from "../history"
 class TradeItem extends React.Component {
 
     state = {
-        status: null
+        status: null,
+        error: ""
     }
 
 
@@ -28,8 +29,9 @@ class TradeItem extends React.Component {
                 ProgressStatus.setStatus(response.data.status)
                 this.setState({status: ProgressStatus.getStatus()});
             })
-            .catch(function (error) {
-                console.log(error);
+            .catch( (error) => {
+                console.log(error.response.data.message);
+                this.setState({error : error.response.data.message})
             });
     }
 
@@ -54,9 +56,12 @@ class TradeItem extends React.Component {
             .then((res) => {
                 console.log("post= ", res)
                 ProgressStatus.setStatus(res.data.status)
-                this.setState({status: ProgressStatus.getStatus()});
-            }).catch(function (error) {
-            console.log(error);
+                this.setState({status: ProgressStatus.getStatus(),error:""});
+
+
+            }).catch( (error) => {
+                console.log(error.response.data.message);
+                this.setState({error : error.response.data.message})
         })
     }
 
@@ -87,6 +92,12 @@ class TradeItem extends React.Component {
         this.invoke("makePayment", [this.id]);
     }
 
+    renderError = () => {
+        return (<div className="errorText">
+            {this.state.error}
+            </div>)
+    }
+
     render() {
 
         if (!this.state.status) {
@@ -109,6 +120,8 @@ class TradeItem extends React.Component {
                 <button className="ui button" onClick={this.getHistory}>
                     GetHistory
                 </button>
+
+                {this.renderError()}
             </div>
         )
     }
