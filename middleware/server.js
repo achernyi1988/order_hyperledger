@@ -43,6 +43,8 @@ app.get('/', function(req, res) {
     console.log("invoke = ",req.body );
 
     client.invokeChaincode( req.body.fcn, req.body.args, (responseStatus, err)=> {
+
+      console.log("responseStatus: ",responseStatus )
        if(err){
          return res.status(500).json({
             message: responseStatus,

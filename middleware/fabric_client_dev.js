@@ -290,8 +290,8 @@ invokeChaincode = async(fcn,args, callback) => {
     var responseStatus;
     if(all_good){
         responseStatus = results[0][0].response.payload.toString('utf-8')
-    }else{
-
+    }else{//error 
+        responseStatus = results[0][0].message;
     }
 
     console.log("print",responseStatus);
@@ -335,7 +335,7 @@ invokeChaincode = async(fcn,args, callback) => {
             // do the housekeeping when there is a problem
             event_hub.unregisterTxEvent(tx_id_string);
             console.log('Timeout - Failed to receive the transaction event');
-            callback("Timeout - Failed to receive the transaction event", true);
+            callback("Timeout - Failed to receive the transaction event => " + responseStatus, true);
             event_hub.disconnect();
         }
 
@@ -355,7 +355,7 @@ invokeChaincode = async(fcn,args, callback) => {
             let message = util.format('\tThe invoke chaincode transaction was invalid, code:%s',code);
             console.log(message);
         
-            callback("submitted failed",true);
+            callback("Invalid " + responseStatus, true);
         } else {
             shouldUnregister = false;
             console.log('\tThe invoke chaincode transaction was VALID.');
