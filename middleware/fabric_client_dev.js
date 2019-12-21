@@ -224,6 +224,65 @@ async function getChannelInfo() {
 }
 
 /**
+ * Creates an instance of the Channel class
+ */
+async function setupChannel() {
+    try {
+        // Get the Channel class instance from client
+        channel = await client.getChannel(CHANNEL_NAME, true)
+    } catch (e) {
+        console.log("Could NOT create channel: ", CHANNEL_NAME)
+        process.exit(1)
+    }
+    console.log("Created channel object.")
+
+    return channel
+}
+
+/**
+ * Prints information in the block
+ * @param {*} block 
+ */
+function printBlockInfo(block) {
+    console.log('Block Number: ' + block.header.number);
+    console.log('Block Hash: ' +calculateBlockHash(block.header))
+    console.log('\tPrevious Hash: ' + block.header.previous_hash);
+    console.log('\tData Hash: ' + block.header.data_hash);
+    console.log('\tTransactions Count: ' + block.data.data.length);
+
+    block.data.data.forEach(transaction => {
+      console.log('\t\tTransaction ID: ' + transaction.payload.header.channel_header.tx_id);
+      console.log('\t\tCreator ID: ' + transaction.payload.header.signature_header.creator.Mspid);
+    // Following lines if uncommented will dump too much info :)
+    //   console.log('Data: ');
+    //   console.log(JSON.stringify(transaction.payload.data));
+    })
+}
+
+/**
+ * Used for calculating hash for block received with channel.queryBlock
+ * @param {*} header 
+ */
+function calculateBlockHash(header) {
+    let headerAsn = asn.define('headerAsn', function () {
+        this.seq().obj(
+            this.key('Number').int(),
+            this.key('PreviousHash').octstr(),
+            this.key('DataHash').octstr()
+        );
+    });
+
+    let output = headerAsn.encode({
+        Number: parseInt(header.number),
+        PreviousHash: Buffer.from(header.previous_hash, 'hex'),
+        DataHash: Buffer.from(header.data_hash, 'hex')
+    }, 'der');
+
+    let hash = sha.sha256(output);
+    return hash;
+}
+
+/**
  * Get the information on instantiated chaincode
  */
 async function getChaincodeInfo(){
@@ -384,7 +443,7 @@ queryChaincode = async (fcn,args,callback) =>{
     // Execute the query
     try{
     chaincodes = await channel.queryByChaincode({
-       // targets: USER_NAME,
+        targets: USER_NAME,
         chaincodeId: CHAINCODE_ID,
         fcn,
         args
@@ -406,68 +465,6 @@ queryChaincode = async (fcn,args,callback) =>{
 
     callback(res);
 }
-
-
-/**
- * Creates an instance of the Channel class
- */
-async function setupChannel() {
-    try {
-        // Get the Channel class instance from client
-        channel = await client.getChannel(CHANNEL_NAME, true)
-    } catch (e) {
-        console.log("Could NOT create channel: ", CHANNEL_NAME)
-        process.exit(1)
-    }
-    console.log("Created channel object.")
-
-    return channel
-}
-
-/**
- * Prints information in the block
- * @param {*} block 
- */
-function printBlockInfo(block) {
-    console.log('Block Number: ' + block.header.number);
-    console.log('Block Hash: ' +calculateBlockHash(block.header))
-    console.log('\tPrevious Hash: ' + block.header.previous_hash);
-    console.log('\tData Hash: ' + block.header.data_hash);
-    console.log('\tTransactions Count: ' + block.data.data.length);
-
-    block.data.data.forEach(transaction => {
-      console.log('\t\tTransaction ID: ' + transaction.payload.header.channel_header.tx_id);
-      console.log('\t\tCreator ID: ' + transaction.payload.header.signature_header.creator.Mspid);
-    // Following lines if uncommented will dump too much info :)
-    //   console.log('Data: ');
-    //   console.log(JSON.stringify(transaction.payload.data));
-    })
-}
-
-/**
- * Used for calculating hash for block received with channel.queryBlock
- * @param {*} header 
- */
-function calculateBlockHash(header) {
-    let headerAsn = asn.define('headerAsn', function () {
-        this.seq().obj(
-            this.key('Number').int(),
-            this.key('PreviousHash').octstr(),
-            this.key('DataHash').octstr()
-        );
-    });
-
-    let output = headerAsn.encode({
-        Number: parseInt(header.number),
-        PreviousHash: Buffer.from(header.previous_hash, 'hex'),
-        DataHash: Buffer.from(header.data_hash, 'hex')
-    }, 'der');
-
-    let hash = sha.sha256(output);
-    return hash;
-}
-
-
 
 module.exports = {
     switchAccount,

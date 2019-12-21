@@ -22,6 +22,10 @@ organizations:
     mspid: ExporterOrgMSP
     peers:
       - peer0.exporterorg.trade.com
+  ImporterOrg:
+    mspid: ImporterOrgMSP
+    peers:
+      - peer0.importerorg.trade.com
      #  - Admin
 #  Budget:
 #    mspid: BudgetMSP
@@ -49,7 +53,11 @@ channels:
         chaincodeQuery: true
         ledgerQuery: true
         eventSource: true
-
+      peer0.importerorg.trade.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
       # Budget peer - with roles played by the peer
     #  budget-peer1.acme.com:
         # Roles for which this peer may be used
@@ -86,6 +94,10 @@ peers:
   peer0.exporterorg.trade.com:
 
     url: grpc://127.0.0.1:7051
+
+  peer0.importerorg.trade.com:
+
+    url: grpc://127.0.0.1:8051
 
     # grpcOptions:
     #   ssl-target-name-override: peer0.acme.com

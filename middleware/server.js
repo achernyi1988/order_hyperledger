@@ -1,5 +1,5 @@
 
-const client = require("./fabric_client_dev");
+const client = require("./fabric_client_net");
 const bodyParser = require('body-parser');
 const express = require('express');
 const path = require('path');

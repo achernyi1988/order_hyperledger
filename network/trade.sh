@@ -109,7 +109,6 @@ function askProceed () {
 # Obtain CONTAINER_IDS and remove them
 # TODO Might want to make this optional - could clear other containers
 function clearContainers () {
-  docker volume prune -f
   
   CONTAINER_IDS=$(docker ps -aq)
   if [ -z "$CONTAINER_IDS" -o "$CONTAINER_IDS" == " " ]; then
@@ -290,6 +289,7 @@ function newOrgNetworkDown () {
 
 # Delete network artifacts
 function networkClean () {
+  
   #Cleanup the chaincode containers
   clearContainers
   #Cleanup images
@@ -307,6 +307,7 @@ function networkClean () {
   if [ "$DEV_MODE" = true ] ; then
      popd
   fi
+   docker volume prune -f
 }
 
 # Using docker-compose-e2e-template.yaml, replace constants with private key file names

@@ -4,4 +4,4 @@ chaincode/order/vendor/*
 middleware/node_modules/*
 middleware/credstore/*
 
- **/middleware/credstore/DevOrg/hfc-kvs/*
+network/tradechannel.block

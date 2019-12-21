@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
@@ -29,6 +30,7 @@ import (
 
 // TradeWorkflowChaincode implementation
 type TradeWorkflowChaincode struct {
+	testMode bool
 }
 
 const (
@@ -75,14 +77,14 @@ func (t *TradeWorkflowChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Res
 	}
 	creatorOrg := ""
 	creatorCertIssuer := ""
-	// if !t.testMode {
-	creatorOrg, creatorCertIssuer, err = getTxCreatorInfo(creator)
-	// 	if err != nil {
-	// 		fmt.Errorf("Error extracting creator identity info: %s\n", err.Error())
-	// 		return shim.Error(err.Error())
-	// 	}
-	// 	fmt.Printf("TradeWorkflow Invoke by '%s', '%s'\n", creatorOrg, creatorCertIssuer)
-	// }
+	if !t.testMode {
+		creatorOrg, creatorCertIssuer, err = getTxCreatorInfo(creator)
+		if err != nil {
+			fmt.Println(fmt.Errorf("Error extracting creator identity info: %s\n", err.Error()))
+			return shim.Error(err.Error())
+		}
+		fmt.Printf("TradeWorkflow Invoke by '%s', '%s'\n", creatorOrg, creatorCertIssuer)
+	}
 
 	function, args := stub.GetFunctionAndParameters()
 
@@ -348,9 +350,9 @@ func (t *TradeWorkflowChaincode) requestOrder(stub shim.ChaincodeStubInterface, 
 	var err error
 
 	// Access control: Only an Importer Org member can invoke this transaction
-	// if !t.testMode && !authenticateImporterOrg(creatorOrg, creatorCertIssuer) {
-	// 	return shim.Error("Caller not a member of Importer Org. Access denied.")
-	// }
+	if !t.testMode && !authenticateImporterOrg(creatorOrg, creatorCertIssuer) {
+		return shim.Error("Caller not a member of Importer Org. Access denied.")
+	}
 
 	if len(args) != 4 {
 		err = errors.New(fmt.Sprintf("Incorrect number of arguments. Expecting 3: {ID, Amount, Description of Goods}. Found %d", len(args)))
@@ -878,8 +880,18 @@ func deliverCargo(stub shim.ChaincodeStubInterface, orderId string) (*TradeAgree
 }
 
 func main() {
-	fmt.Printf("order runs\n")
+
 	twc := new(TradeWorkflowChaincode)
+
+	if len(os.Args) >= 4 {
+		fmt.Printf("order runs %s \n", os.Args[3])
+		if os.Args[3] == "testMode" {
+			twc.testMode = true
+		}
+	} else {
+		fmt.Printf("order runs 1 \n")
+	}
+
 	err := shim.Start(twc)
 	if err != nil {
 		fmt.Printf("Error starting order chaincode: %s\n", err)
