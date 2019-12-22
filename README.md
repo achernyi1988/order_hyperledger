@@ -8,7 +8,7 @@ export CORE_PEER_LOCALMSPID=ExporterOrgMSP
 #import
 export CORE_PEER_MSPCONFIGPATH=/blockchain/hyperledger/book_2019/src/trade-finance-logistics/order_hyperledger/network/crypto-config/peerOrganizations/importer.trade.com/users/Admin@importer.trade.com/msp/
 export CORE_PEER_ADDRESS=peer0.importer.trade.com:8051
-export CORE_PEER_LOCALMSPID=importerMSP
+export CORE_PEER_LOCALMSPID=ImporterOrgMSP
 
 export CORE_PEER_TLS_ROOTCERT_FILE=/blockchain/hyperledger/book_2019/src/trade-finance-logistics/network/crypto-config/ordererOrganizations/trade.com/orderers/orderer.trade.com/tls/ca.crt
 

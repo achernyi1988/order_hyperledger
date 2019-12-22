@@ -889,7 +889,7 @@ func main() {
 			twc.testMode = true
 		}
 	} else {
-		fmt.Printf("order runs 1 \n")
+		fmt.Printf("order runs \n")
 	}
 
 	err := shim.Start(twc)
