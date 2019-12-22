@@ -96,7 +96,7 @@ class TradeItem extends React.Component {
         return (<div className="errorText">
             {this.state.error}
             </div>)
-    }
+    };
 
     render() {
 
