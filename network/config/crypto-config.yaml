@@ -36,7 +36,7 @@ PeerOrgs:
   # ExporterOrg
   # ---------------------------------------------------------------------------
   - Name: ExporterOrg
-    Domain: exporterorg.trade.com
+    Domain: exporter.trade.com
     EnableNodeOUs: true
     # ---------------------------------------------------------------------------
     # "Specs"
@@ -86,7 +86,7 @@ PeerOrgs:
   # ImporterOrg
   # ---------------------------------------------------------------------------
   - Name: ImporterOrg
-    Domain: importerorg.trade.com
+    Domain: importer.trade.com
     EnableNodeOUs: true
     Template:
       Count: 1
@@ -96,7 +96,7 @@ PeerOrgs:
   # CarrierOrg
   # ---------------------------------------------------------------------------
   - Name: CarrierOrg
-    Domain: carrierorg.trade.com
+    Domain: carrier.trade.com
     EnableNodeOUs: true
     Template:
       Count: 1

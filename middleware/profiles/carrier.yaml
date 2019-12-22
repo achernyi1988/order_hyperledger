@@ -1,0 +1,12 @@
+# Sample YAML for client config
+name: "CarrierrOrg Client"
+version: "1.0"
+client:
+  organization: CarrierrOrg
+  credentialStore:
+    path: "./credstore/carrier_client/hfc-kvs"
+    cryptoStore:
+      path: "./credstore/carrier_client/hfc-cvs"
+  connection:
+    options:
+      grpc.keepalive_time_ms: 120000

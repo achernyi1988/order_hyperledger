@@ -15,9 +15,9 @@ const BUDGET_CLIENT_CONNECTION_PROFILE_PATH = './profiles/budget-max.yaml'
 
 // Org & User
 const MSP_ID = "ImporterOrgMSP"
-const ORG_NAME = 'importerorg.trade.com'
-const USER_NAME = 'peer0.importerorg.trade.com'   // Non admin identity will lead to 'access denied' try User1
-const PEER_NAME = 'peer0.importerorg.trade.com'
+const ORG_NAME = 'importer.trade.com'
+const USER_NAME = 'peer0.importer.trade.com'   // Non admin identity will lead to 'access denied' try User1
+const PEER_NAME = 'peer0.importer.trade.com'
 const CHANNEL_NAME = 'tradechannel'
 const CHAINCODE_ID = "test"
 const CRYPTO_CONFIG_CLIENT_PATH = "../network/crypto-config/peerOrganizations"
@@ -72,10 +72,10 @@ async function setupClient() {
 switchAccount = async (org, user) => {
 
     // setup the instance
-    if (org == 'importerorg.trade.com') {
+    if (org == 'importer.trade.com') {
         client.loadFromConfig(EXPORTER_CLIENT_CONNECTION_PROFILE_PATH)
     }
-    else if (org == 'exporterorg.trade.com') {
+    else if (org == 'exporter.trade.com') {
         client.loadFromConfig(EXPORTER_CLIENT_CONNECTION_PROFILE_PATH)
     } else if (org == 'budget') {
         client.loadFromConfig(BUDGET_CLIENT_CONNECTION_PROFILE_PATH)
@@ -174,8 +174,8 @@ function getCertPath(org, user) {
     //budget.com/users/Admin@budget.com/msp/signcerts/Admin@budget.com-cert.pem"
     //var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + ".com/users/" + user + "@" + org + ".com/msp/signcerts/" + user + "@" + org + ".com-cert.pem"
 
-    //var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + PEER_NAME + `/msp/signcerts/peer0.exporterorg.trade.com-cert.pem`
-    var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + PEER_NAME + `/msp/signcerts/peer0.importerorg.trade.com-cert.pem`
+    //var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + PEER_NAME + `/msp/signcerts/peer0.exporter.trade.com-cert.pem`
+    var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + PEER_NAME + `/msp/signcerts/peer0.importer.trade.com-cert.pem`
 
     console.log("getCertPath", certPath);
     return certPath
@@ -276,7 +276,19 @@ async function setupChannel() {
         console.log("Could NOT create channel: ", CHANNEL_NAME)
         process.exit(1)
     }
+
+    var peers = channel.getPeers()
+
     console.log("Created channel object.")
+
+
+    peers.forEach(element => { 
+
+        var partsOfStr = element.getName().split('.');
+        if(partsOfStr.length >= 2)
+        console.log(partsOfStr[1]); 
+      }); 
+
 
     return channel
 }

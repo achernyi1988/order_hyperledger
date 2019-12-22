@@ -230,7 +230,7 @@ function upgradeNetwork () {
   docker cp -a orderer.trade.com:/var/hyperledger/production/orderer $LEDGERS_BACKUP/orderer.trade.com
   docker-compose $COMPOSE_FILES up --no-deps orderer.trade.com
 
-  for PEER in peer0.exporterorg.trade.com peer0.importerorg.trade.com peer0.carrierorg.trade.com peer0.regulatororg.trade.com; do
+  for PEER in peer0.exporter.trade.com peer0.importer.trade.com peer0.carrier.trade.com peer0.regulatororg.trade.com; do
     echo "Upgrading peer $PEER"
 
     # Stop the peer and backup its ledger
@@ -261,7 +261,7 @@ function networkDown () {
 
   docker-compose -f $COMPOSE_FILE down --volumes
 
-  for PEER in peer0.exporterorg.trade.com peer0.importerorg.trade.com peer0.carrierorg.trade.com peer0.regulatororg.trade.com; do
+  for PEER in peer0.exporter.trade.com peer0.importer.trade.com peer0.carrier.trade.com peer0.regulatororg.trade.com; do
     # Remove any old containers and images for this peer
     CC_CONTAINERS=$(docker ps -a | grep dev-$PEER | awk '{print $1}')
     if [ -n "$CC_CONTAINERS" ] ; then
@@ -333,11 +333,11 @@ function replacePrivateKey () {
     # actual values of the private key file names for the two CAs.
     if [ $(uname -s) == 'Darwin' ] ; then
       CURRENT_DIR=$PWD
-      cd crypto-config/peerOrganizations/exporterorg.trade.com/ca/
+      cd crypto-config/peerOrganizations/exporter.trade.com/ca/
       PRIV_KEY=$(ls *_sk)
       cd "$CURRENT_DIR"
       sed -i '' "s/EXPORTER_CA_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-e2e.yaml
-      cd crypto-config/peerOrganizations/importerorg.trade.com/ca/
+      cd crypto-config/peerOrganizations/importer.trade.com/ca/
       PRIV_KEY=$(ls *_sk)
       cd "$CURRENT_DIR"
       sed -i '' "s/IMPORTER_CA_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-e2e.yaml
@@ -351,11 +351,11 @@ function replacePrivateKey () {
       sed -i '' "s/REGULATOR_CA_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-e2e.yaml
     else
       CURRENT_DIR=$PWD
-      cd crypto-config/peerOrganizations/exporterorg.trade.com/ca/
+      cd crypto-config/peerOrganizations/exporter.trade.com/ca/
       PRIV_KEY=$(ls *_sk)
       cd "$CURRENT_DIR"
       sed -i "s/EXPORTER_CA_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-e2e.yaml
-      cd crypto-config/peerOrganizations/importerorg.trade.com/ca/
+      cd crypto-config/peerOrganizations/importer.trade.com/ca/
       PRIV_KEY=$(ls *_sk)
       cd "$CURRENT_DIR"
       sed -i "s/IMPORTER_CA_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-e2e.yaml
@@ -483,7 +483,7 @@ function generateCertsForNewOrg (){
 # These headers are important, as we will pass them in as arguments when we create
 # our artifacts.  This file also contains two additional specifications that are worth
 # noting.  Firstly, we specify the anchor peers for each Peer Org
-# (``peer0.exporterorg.trade.com`` & ``peer0.importerorg.trade.com``).  Secondly, we point to
+# (``peer0.exporter.trade.com`` & ``peer0.importer.trade.com``).  Secondly, we point to
 # the location of the MSP directory for each member, in turn allowing us to store the
 # root certificates for each Org in the orderer genesis block.  This is a critical
 # concept. Now any network entity communicating with the ordering service can have

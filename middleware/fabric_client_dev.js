@@ -155,7 +155,7 @@ function getCertPath(org, user) {
     //budget.com/users/Admin@budget.com/msp/signcerts/Admin@budget.com-cert.pem"
     //var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + ".com/users/" + user + "@" + org + ".com/msp/signcerts/" + user + "@" + org + ".com-cert.pem"
 
-    //var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + PEER_NAME + `/msp/signcerts/peer0.exporterorg.trade.com-cert.pem`
+    //var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + PEER_NAME + `/msp/signcerts/peer0.exporter.trade.com-cert.pem`
     var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + USER_NAME + `/msp/signcerts/peer0.devorg.trade.com-cert.pem`
 
     console.log("getCertPath", certPath);

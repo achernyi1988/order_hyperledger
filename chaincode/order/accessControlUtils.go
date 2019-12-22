@@ -37,17 +37,17 @@ func getTxCreatorInfo(creator []byte) (string, string, error) {
 }
 
 func authenticateExporterOrg(mspID string, certCN string) bool {
-	return (mspID == "ExporterOrgMSP") && (certCN == "ca.exporterorg.trade.com")
+	return (mspID == "ExporterOrgMSP") && (certCN == "ca.exporter.trade.com")
 }
 
 func authenticateImporterOrg(mspID string, certCN string) bool {
-	return (mspID == "ImporterOrgMSP") && (certCN == "ca.importerorg.trade.com")
+	return (mspID == "ImporterOrgMSP") && (certCN == "ca.importer.trade.com")
 }
 
 func authenticateCarrierOrg(mspID string, certCN string) bool {
-	return (mspID == "CarrierOrgMSP") && (certCN == "ca.carrierorg.trade.com")
+	return (mspID == "CarrierOrgMSP") && (certCN == "ca.carrier.trade.com")
 }
 
 func authenticateRegulatorOrg(mspID string, certCN string) bool {
-	return (mspID == "RegulatorOrgMSP") && (certCN == "ca.regulatororg.trade.com")
+	return (mspID == "RegulatorOrgMSP") && (certCN == "ca.regulator.trade.com")
 }

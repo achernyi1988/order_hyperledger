@@ -18,9 +18,9 @@ version: '2'
 
 volumes:
   orderer.trade.com:
-  peer0.exporterorg.trade.com:
-  peer0.importerorg.trade.com:
-  peer0.carrierorg.trade.com:
+  peer0.exporter.trade.com:
+  peer0.importer.trade.com:
+  peer0.carrier.trade.com:
   peer0.regulatororg.trade.com:
 
 networks:
@@ -30,15 +30,15 @@ services:
     image: hyperledger/fabric-ca:$IMAGE_TAG
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
-      - FABRIC_CA_SERVER_CA_NAME=ca-exporterorg
+      - FABRIC_CA_SERVER_CA_NAME=ca-exporter
       - FABRIC_CA_SERVER_TLS_ENABLED=false
-      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.exporterorg.trade.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.exporter.trade.com-cert.pem
       - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/EXPORTER_CA_PRIVATE_KEY
     ports:
       - "7054:7054"
-    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.exporterorg.trade.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/EXPORTER_CA_PRIVATE_KEY -b admin:adminpw -d'
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.exporter.trade.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/EXPORTER_CA_PRIVATE_KEY -b admin:adminpw -d'
     volumes:
-      - ./crypto-config/peerOrganizations/exporterorg.trade.com/ca/:/etc/hyperledger/fabric-ca-server-config
+      - ./crypto-config/peerOrganizations/exporter.trade.com/ca/:/etc/hyperledger/fabric-ca-server-config
     container_name: ca_peerExporterOrg
     networks:
       - trade
@@ -47,15 +47,15 @@ services:
     image: hyperledger/fabric-ca:$IMAGE_TAG
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
-      - FABRIC_CA_SERVER_CA_NAME=ca-importerorg
+      - FABRIC_CA_SERVER_CA_NAME=ca-importer
       - FABRIC_CA_SERVER_TLS_ENABLED=true
-      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.importerorg.trade.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.importer.trade.com-cert.pem
       - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/IMPORTER_CA_PRIVATE_KEY
     ports:
       - "8054:7054"
-    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.importerorg.trade.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/IMPORTER_CA_PRIVATE_KEY -b admin:adminpw -d'
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.importer.trade.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/IMPORTER_CA_PRIVATE_KEY -b admin:adminpw -d'
     volumes:
-      - ./crypto-config/peerOrganizations/importerorg.trade.com/ca/:/etc/hyperledger/fabric-ca-server-config
+      - ./crypto-config/peerOrganizations/importer.trade.com/ca/:/etc/hyperledger/fabric-ca-server-config
     container_name: ca_peerImporterOrg
     networks:
       - trade
@@ -102,27 +102,27 @@ services:
     networks:
       - trade
 
-  peer0.exporterorg.trade.com:
-    container_name: peer0.exporterorg.trade.com
+  peer0.exporter.trade.com:
+    container_name: peer0.exporter.trade.com
     extends:
       file:  base/docker-compose-base.yaml
-      service: peer0.exporterorg.trade.com
+      service: peer0.exporter.trade.com
     networks:
       - trade
 
-  peer0.importerorg.trade.com:
-    container_name: peer0.importerorg.trade.com
+  peer0.importer.trade.com:
+    container_name: peer0.importer.trade.com
     extends:
       file:  base/docker-compose-base.yaml
-      service: peer0.importerorg.trade.com
+      service: peer0.importer.trade.com
     networks:
       - trade
 
-  peer0.carrierorg.trade.com:
-    container_name: peer0.carrierorg.trade.com
+  peer0.carrier.trade.com:
+    container_name: peer0.carrier.trade.com
     extends:
       file:  base/docker-compose-base.yaml
-      service: peer0.carrierorg.trade.com
+      service: peer0.carrier.trade.com
     networks:
       - trade
 
