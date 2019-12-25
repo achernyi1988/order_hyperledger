@@ -1,14 +1,17 @@
 import React from 'react';
 import {query, invoke} from "../api/axios"
 import StepProgress from "./StepProgress"
-import ProgressStatus from "../helper/helper"
+import ProgressStatus from "../helper/ProgressStatus"
 import history from "../history"
 
 class TradeItem extends React.Component {
 
     state = {
         status: null,
-        error: ""
+        content: null,
+        error: "",
+        input: '',
+        location: ''
     }
 
 
@@ -19,96 +22,135 @@ class TradeItem extends React.Component {
         console.log("componentDidMount status = ", ProgressStatus.getStatus());
         this.id = (this.props.match.params.id);
         this.getTrade();
+        this.getShipment();
+    }
+
+    getShipment = () => {
+        query("/query", "getShipment", [this.id])
+            .then((response) => {
+                console.log("getShipment get= ", response.data)
+
+                this.setState({location: response.data.location});
+            })
+            .catch((error) => {
+                if (typeof error.response !== "undefined") {
+                    console.log("getShipment", error.response.data.message);
+                }
+            });
     }
 
     getTrade = () => {
-         query("/query", "getOrder", [this.id])
-            .then((response) => {
+        query("/query", "getOrder", [this.id])
+            .then(  (response) => {
                 console.log("get= ", response.data)
 
                 ProgressStatus.setStatus(response.data.status)
-                this.setState({status: ProgressStatus.getStatus()});
+                this.setState({content: response.data, status: ProgressStatus.getStatus()});
             })
-            .catch( (error) => {
-                console.log(error.response.data.message);
-                this.setState({error : error.response.data.message})
+            .catch((error) => {
+                if (typeof error.response !== "undefined") {
+                    console.log(error.response.data.message);
+                    this.setState({error: error.response.data.message})
+                }
             });
     }
 
     reset = () => {
         console.log("TradeItem::reset");
-        this.invoke("reset", [this.id])
-            .then (()=>{
-            history.push("/");
-        }).catch( (error) => {
-            console.log(error);
-        });
+        this.invoke("reset", [this.id], () => {
+            history.push("/")
+        })
+
     }
 
-    getHistory = () =>{
+    getHistory = () => {
         history.push(`/history/${this.id}`);
     }
 
 
-    invoke = (fcn, args) => {
+    invoke = (fcn, args, resolve) => {
 
         return invoke(fcn, args)
-            .then((res) => {
+            .then(async (res) => {
                 console.log("post= ", res)
+                resolve();
                 ProgressStatus.setStatus(res.data.status)
-                this.setState({status: ProgressStatus.getStatus(),error:""});
+                this.setState({status: ProgressStatus.getStatus(), error: ""});
 
-
-            }).catch( (error) => {
+            })
+            .catch((error) => {
                 console.log(error.response.data.message);
-                this.setState({error : error.response.data.message})
-        })
+                this.setState({error: error.response.data.message})
+            })
     }
 
     onAcceptOrder = (value) => {
         console.log("TradeItem::onAcceptOrder", value);
 
-        this.invoke("acceptOrder", [this.id]);
+        this.invoke("acceptOrder", [this.id], () => {
+        });
     }
 
     onPrepayment = () => {
         console.log("TradeItem::makePrepayment");
 
-        this.invoke("makePrepayment", [this.id]);
+        this.invoke("makePrepayment", [this.id], () => {
+        });
     }
 
     onSetoff = () => {
         console.log("TradeItem::prepareShipment");
-        this.invoke("prepareShipment", [this.id, "Shanghai", "Odessa", "Shanghai", "19.02.2020", "20.03.2020"]);
+        this.invoke("prepareShipment", [this.id, "Shanghai", "Odessa", "19.02.2020", "20.03.2020"], () => {
+            this.setState({location: "Shanghai"});
+        })
     }
 
-    onUpdateLocation = () => {
-        console.log("TradeItem::updateShipmentLocation");
-        this.invoke("updateShipmentLocation", [this.id, "Odessa"]);
+    onUpdateLocation = (value) => {
+        console.log("TradeItem::updateShipmentLocation", value);
+        this.invoke("updateShipmentLocation", [this.id, value], () => {
+            this.getShipment();
+        })
+
     }
 
     onFullPay = () => {
         console.log("TradeItem::makePayment");
-        this.invoke("makePayment", [this.id]);
+        this.invoke("makePayment", [this.id], () => {
+            this.getShipment();
+        });
     }
 
     renderError = () => {
         return (<div className="errorText">
             {this.state.error}
-            </div>)
+        </div>)
     };
+
+
+    handleSubmit = (event) => {
+        event.preventDefault();
+        this.onUpdateLocation(this.state.input);
+        this.setState({input: ""});
+
+    }
 
     render() {
 
-        if (!this.state.status) {
+        const {status, content, location} = this.state;
+        if (!status || !content) {
             return null;
         }
         return (
             <div>
-                <StepProgress status={this.state.status}
+                <span className={"ui header"}>{content.description}  </span>
+                <span className={"ui header"} style={{color: "green"}}>{content.amount}$ </span>
+                <div className={"ui header"} style={{color: "blue"}}>{`current location: ${location}`} </div>
+
+                <p/>
+                <StepProgress status={status}
                               onAcceptOrder={this.onAcceptOrder}
                               onPrepayment={this.onPrepayment} onSetoff={this.onSetoff}
-                              onUpdateLocation={this.onUpdateLocation} onFullPay={this.onFullPay}
+                              onFullPay={this.onFullPay}
                 />
 
                 <button className="ui primary button" onClick={this.getTrade}>
@@ -121,6 +163,18 @@ class TradeItem extends React.Component {
                     GetHistory
                 </button>
 
+                {"SETOFF" === ProgressStatus.getCurrentStatus() ?
+                    <form onSubmit={this.handleSubmit}>
+                        <p className={"field"}>
+                            <input value={this.state.input} onChange={(event) => {
+                                this.setState({input: event.target.value});
+                            }} placeholder={"Input the current city"}/>
+                        </p>
+                        <button className="ui primary button" type={"submit"}>
+                            Submit
+                        </button>
+                    </form>
+                    : null}
                 {this.renderError()}
             </div>
         )

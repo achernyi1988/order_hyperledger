@@ -9,6 +9,8 @@ class ProgressStatus {
             PREPAYMENT: "disabled step", SETOFF: "disabled step",
             DELIVERED: "disabled step", PAID: "disabled step"
         };
+
+        this.currentStatus = "REQUESTED";
     }
 
 
@@ -18,7 +20,15 @@ class ProgressStatus {
         return this.status;
     }
 
+    getCurrentStatus = () => {
+        return this.currentStatus;
+    }
+
+
     setStatus  = (value) => {
+
+        this.currentStatus = value;
+
         switch (value) {
             case "REQUESTED":
                 this.status.REQUESTED = "completed step";

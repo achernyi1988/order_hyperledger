@@ -60,8 +60,7 @@ const StepProgress = ((props) => {
             <div className={status.DELIVERED}>
                 <i className="street view icon"></i>
                 <div className="content">
-                    <button className={DELIVERED_ACTIVE ? "btn active": "btn inactive"}
-                            onClick={DELIVERED_ACTIVE ? props.onUpdateLocation : null}>
+                    <button className={DELIVERED_ACTIVE ? "btn active": "btn inactive"}>
                         {"Update a shipment location"}
                     </button>
                     <div className="description">Carrier</div>

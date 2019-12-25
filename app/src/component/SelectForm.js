@@ -37,42 +37,24 @@ const theme = theme => ({
 });
 
 
-class SelectForm extends React.Component {
-    state = {
-        selectedOption: null
-    };
+const SelectForm = (props) => {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            selectedOption: {label: "importer"}
-        };
-    }
+    const {current, options} = props;
 
-    handleChange = selectedOption => {
-        this.setState({selectedOption: selectedOption});
-        console.log(`Option selected:`, selectedOption);
-    };
+    return (
+        <div style={{width: "150px"}}>
+            <Select
 
-    render() {
-        const {selectedOption} = this.state;
-
-        console.log(`render selectedOption `, selectedOption);
-
-        return (
-            <div style={{width: "150px"}}>
-                <Select
-
-                    value={selectedOption}
-                    onChange={this.handleChange}
-                    options={this.props.options}
-                    getOptionLabel={option => `${option.label}`}
-                    theme={theme}
-                />
-            </div>
-        );
-
-    }
+                value={current}
+                onChange={(value) => {
+                    props.onLogin(value);
+                }}
+                options={options}
+                getOptionLabel={option => `${option.name}`}
+                theme={theme}
+            />
+        </div>
+    );
 }
 
 export default SelectForm;
