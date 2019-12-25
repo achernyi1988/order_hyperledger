@@ -1,3 +1,5 @@
+RED='\033[0;31m'
+GREEN='\033[0;32m'
 
 ACTION=$1;
 VERSION=$2;
@@ -28,9 +30,8 @@ CORE_CHAINCODE_ID_NAME=test:${VERSION} CORE_PEER_TLS_ENABLED=false go run /block
 elif [ "$ACTION" == "rundev" ]; then
 CORE_CHAINCODE_ID_NAME=test:${VERSION} CORE_PEER_TLS_ENABLED=false go run /blockchain/hyperledger/book_2019/src/trade-finance-logistics/order_hyperledger/chaincode/order/*.go -peer.address ${CORE_PEER_NAME}:${CORE_LISTENING_PORT} testMode
 else
-  exit 1
+  echo -e ${RED}"error: no action found"
 fi
 
-
-echo "${ACTION} is done for ${CORE_PEER_NAME}"
+echo -e ${GREEN}"${ACTION} is done for ${CORE_PEER_NAME}"
 

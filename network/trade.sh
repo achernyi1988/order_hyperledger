@@ -308,6 +308,7 @@ function networkClean () {
      popd
   fi
    docker volume prune -f
+   rm -R /blockchain/hyperledger/book_2019/src/trade-finance-logistics/order_hyperledger/middleware/credstore 2>/dev/null
 }
 
 # Using docker-compose-e2e-template.yaml, replace constants with private key file names

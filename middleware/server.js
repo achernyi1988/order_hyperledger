@@ -63,16 +63,14 @@ app.post('/post', async (req, res) => {
  app.get('/query', (req, res) => {
     console.log("query => " + req.query.fcn + "|args:" + req.query.args );
 
-      client.queryChaincode( req.query.fcn, req.query.args, (data) => {
-
-     // console.log(data);
-      // if(data){
-      //    res.send(JSON.parse(data));
-      // }else{
-      //    res.send({});
-      // }
-     
-         res.send(data);
+      client.queryChaincode( req.query.fcn, req.query.args, (responseStatus, err) => {
+         
+      if(err){
+         return res.status(500).json({
+            message: responseStatus,
+            })
+         } 
+         res.send(responseStatus);
    
 
     });

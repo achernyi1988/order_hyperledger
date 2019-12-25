@@ -682,7 +682,7 @@ func (t *TradeWorkflowChaincode) makePayment(stub shim.ChaincodeStubInterface, c
 		return shim.Error(err.Error())
 	}
 
-	fmt.Printf("Trade %s make prepayment recorded\n", args[0])
+	fmt.Printf("Trade %s makePayment recorded\n", args[0])
 
 	return shim.Success([]byte(tradeAgreement.Status))
 }

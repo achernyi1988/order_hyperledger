@@ -470,10 +470,9 @@ invokeChaincode = async(fcn,args, callback) => {
  */
 queryChaincode = async (fcn,args,callback) =>{
 
-    console.log("queryChaincode:PEER_NAME" , PEER_NAME);
     // Execute the query
     try{
-    chaincodes = await channel.queryByChaincode({
+        query_responses = await channel.queryByChaincode({
         targets: PEER_NAME,
         chaincodeId: CHAINCODE_ID,
         fcn,
@@ -483,20 +482,18 @@ queryChaincode = async (fcn,args,callback) =>{
     catch(err){
         console.log("queryChaincode error ", err);
     }
-    // res=`query [a] = ${chaincodes[0].toString("utf8")}\n`;
-    // console.log("query [a] = ",chaincodes[0].toString("utf8"))
 
-    // chaincodes = await channel.queryByChaincode({
-    //     chaincodeId: 'nodecc',
-    //     fcn: 'query',
-    //     args: ['b']
-    // })
-    if(chaincodes.length >= 1){
-        res =`${chaincodes[0].toString("utf8")}`;
-        console.log("queryChaincode=> ",res)
-        callback(res);
-    }else{
-        callback({});
+    if (query_responses && query_responses.length == 1) {
+        if (query_responses[0] instanceof Error) {
+            console.error("error from query = ", query_responses[0].toString());
+            callback(query_responses[0].toString(),true);
+        } else {
+            console.log("Response is ", query_responses[0].toString());
+            callback(query_responses[0],false);
+        }
+    } else {
+        console.log("No payloads were returned from query");
+        callback({},false);
     }
 }
 
