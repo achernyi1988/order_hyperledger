@@ -106,6 +106,7 @@ services:
         - peer0.carrier.trade.com:/var/hyperledger/production
     ports:
       - 9051:7051
+      - 9052:7052
       - 9053:7053
       - 9055:6060
 

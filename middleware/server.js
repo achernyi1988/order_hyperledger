@@ -29,42 +29,70 @@ app.get('/', function(req, res) {
    res.send("send ok");
 });
 
+app.get('/get', (req, res) => {
+   console.log("query => " + req.query.fcn + "|args:" + req.query.args );
+
+   if("getPeer" === req.query.fcn){
+      client.getPeer( data => {
+
+            console.log(data);
+            res.send(data);
+          }); 
+   }
+   else if("getPeers" === req.query.fcn){
+      client.getPeers( data => {
+
+      //   console.log(data);
+         res.send(data);
+       }); 
+   }
+});
+
+app.post('/post', async (req, res) => {
+   console.log("switchAccount = ",req.body.params );
+   let data ;
+   if("switchAccount" == req.body.params.fcn){
+      data = await client.switchAccount(req.body.params.args[0], req.body.params.args[1], req.body.params.args[2]);
+   }
+
+   res.send(data);
+
+});
+
+/*chaincode*/
  app.get('/query', (req, res) => {
     console.log("query => " + req.query.fcn + "|args:" + req.query.args );
 
       client.queryChaincode( req.query.fcn, req.query.args, (data) => {
 
-      console.log(data);
-      res.send(JSON.parse(data));
-    });
- });
-
- app.post('/invoke', (req, res) => {
-    console.log("invoke = ",req.body );
-
-    client.invokeChaincode( req.body.fcn, req.body.args, (responseStatus, err)=> {
-
-      console.log("responseStatus: ",responseStatus )
-       if(err){
-         return res.status(500).json({
-            message: responseStatus,
-          })
-       } 
-      
-       res.send({status:responseStatus});
-       
-    });
-
- });
-
- app.post('/switchAccount', async (req, res) => {
-    console.log("switchAccount = ",req.body );
-
-    let data = await client.switchAccount(req.body.org, req.body.user );
+     // console.log(data);
+      // if(data){
+      //    res.send(JSON.parse(data));
+      // }else{
+      //    res.send({});
+      // }
+     
+         res.send(data);
    
-    res.send(data);
 
+    });
  });
+/*chaincode*/
+app.post('/invoke', (req, res) => {
+   console.log("invoke = ",req.body );
+
+   client.invokeChaincode( req.body.fcn, req.body.args, (responseStatus, err)=> {
+
+   console.log("responseStatus: ",responseStatus )
+      if(err){
+      return res.status(500).json({
+         message: responseStatus,
+         })
+      } 
+      res.send({status:responseStatus});
+   });
+
+});
 
 app.listen(port,(err) =>{
     if(err)  throw err;

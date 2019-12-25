@@ -10,17 +10,19 @@ var sha = require('js-sha256');
 // Constants for profile, wallet & user
 const CONNECTION_PROFILE_PATH = './profiles/dev-connection_net.yaml'
 // Client section configuration
-const EXPORTER_CLIENT_CONNECTION_PROFILE_PATH = './profiles/importer.yaml'
-const BUDGET_CLIENT_CONNECTION_PROFILE_PATH = './profiles/budget-max.yaml'
+const IMPORTER_CLIENT_CONNECTION_PROFILE_PATH = './profiles/importer.yaml'
+const EXPORTER_CLIENT_CONNECTION_PROFILE_PATH = './profiles/exporter.yaml'
+const CARRIER_CLIENT_CONNECTION_PROFILE_PATH = './profiles/carrier.yaml'
 
 // Org & User
 const MSP_ID = "ImporterOrgMSP"
 const ORG_NAME = 'importer.trade.com'
-const USER_NAME = 'peer0.importer.trade.com'   // Non admin identity will lead to 'access denied' try User1
-const PEER_NAME = 'peer0.importer.trade.com'
 const CHANNEL_NAME = 'tradechannel'
 const CHAINCODE_ID = "test"
 const CRYPTO_CONFIG_CLIENT_PATH = "../network/crypto-config/peerOrganizations"
+
+//could be changed during switchAccount
+PEER_NAME = 'peer0.importer.trade.com'
 
 // Variable to hold the client
 const client = Client.loadFromConfig(CONNECTION_PROFILE_PATH)
@@ -65,20 +67,23 @@ async function setupClient() {
 
     // setup the client part
 
-    await switchAccount(ORG_NAME, USER_NAME)
+    await switchAccount(PEER_NAME , ORG_NAME, MSP_ID )
 }
 
 
-switchAccount = async (org, user) => {
+switchAccount = async (user, org, mspid) => {
+
+    console.log("switchAccount",mspid);
+    PEER_NAME=user;
 
     // setup the instance
     if (org == 'importer.trade.com') {
-        client.loadFromConfig(EXPORTER_CLIENT_CONNECTION_PROFILE_PATH)
+        client.loadFromConfig(IMPORTER_CLIENT_CONNECTION_PROFILE_PATH)
     }
     else if (org == 'exporter.trade.com') {
         client.loadFromConfig(EXPORTER_CLIENT_CONNECTION_PROFILE_PATH)
-    } else if (org == 'budget') {
-        client.loadFromConfig(BUDGET_CLIENT_CONNECTION_PROFILE_PATH)
+    } else if (org == 'carrier.trade.com') {
+        client.loadFromConfig(CARRIER_CLIENT_CONNECTION_PROFILE_PATH)
     } else {
         console.log("Invalid Org: ", org)
         return `Invalid Org: ${org}`;
@@ -101,16 +106,13 @@ switchAccount = async (org, user) => {
     if( userContext == null ){
     
         // Create the user context
-        const {userContext, err} = await createUserContext(org, user)
+        const {userContext, err} = await createUserContext(org, user, mspid)
 
         if(null != userContext){
             console.log(`Created ${user} under the credentials store!!!`)
         }else{
             return err;
         }
-
-  
-
     } else { 
         console.log(`User ${user} already exist!!`)
     }
@@ -125,11 +127,11 @@ switchAccount = async (org, user) => {
     return `switched to org  [${org}] | user [${user}] successfully`;
 }
 
-async function createUserContext(org, user) {
+async function createUserContext(org, user, mspid) {
 
     try{
 
-        console.log("org: " + org + " user: " + user);
+        console.log("org: " + org + " user: " + user, " mspid: " + mspid);
     // Get the path  to user private key
     let privateKeyPath = getPrivateKeyPath(org, user)
 
@@ -144,7 +146,7 @@ async function createUserContext(org, user) {
  
     let opts = {
         username: user,
-        mspid:  MSP_ID,
+        mspid:  mspid,
         cryptoContent: {
             privateKey: privateKeyPath,
             signedCert: certPath
@@ -170,12 +172,12 @@ async function createUserContext(org, user) {
  * @param {string} org 
  * @param {string} user 
  */
-function getCertPath(org, user) {
+function getCertPath(org, peer) {
     //budget.com/users/Admin@budget.com/msp/signcerts/Admin@budget.com-cert.pem"
     //var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + ".com/users/" + user + "@" + org + ".com/msp/signcerts/" + user + "@" + org + ".com-cert.pem"
 
     //var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + PEER_NAME + `/msp/signcerts/peer0.exporter.trade.com-cert.pem`
-    var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + PEER_NAME + `/msp/signcerts/peer0.importer.trade.com-cert.pem`
+    var certPath = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + peer + `/msp/signcerts/${peer}-cert.pem`
 
     console.log("getCertPath", certPath);
     return certPath
@@ -187,19 +189,15 @@ function getCertPath(org, user) {
  * @param {string} org 
  * @param {string} user 
  */ 
-function getPrivateKeyPath(org, user) {
+function getPrivateKeyPath(org, peer) {
     // ../crypto/crypto-config/peerOrganizations/budget.com/users/Admin@budget.com/msp/keystore/05beac9849f610ad5cc8997e5f45343ca918de78398988def3f288b60d8ee27c_sk
     //var pkFolder = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + ".com/users/" + user + "@" + org + ".com/msp/keystore"
-    var pkFolder = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + PEER_NAME + "/msp/keystore"
+    var pkFolder = CRYPTO_CONFIG_CLIENT_PATH + "/" + org + "/peers/" + peer + "/msp/keystore"
     console.log("getPrivateKeyPath pkFolder:",pkFolder);
     fs.readdirSync(pkFolder).forEach(file => {
-       // console.log("getPrivateKeyPath ",file);
-        // return the first file
         pkfile = file
         return
     })
-
-    
 
     return (pkFolder + "/" + pkfile)
 
@@ -277,18 +275,7 @@ async function setupChannel() {
         process.exit(1)
     }
 
-    var peers = channel.getPeers()
-
     console.log("Created channel object.")
-
-
-    peers.forEach(element => { 
-
-        var partsOfStr = element.getName().split('.');
-        if(partsOfStr.length >= 2)
-        console.log(partsOfStr[1]); 
-      }); 
-
 
     return channel
 }
@@ -440,7 +427,7 @@ invokeChaincode = async(fcn,args, callback) => {
             event_hub.disconnect();
         }
 
-    }, 5000);
+    }, 3000);
 
     // PHASE-3 of Transaction Flow
     // 2. Register the TX Listenerl
@@ -482,17 +469,19 @@ invokeChaincode = async(fcn,args, callback) => {
  * Demonstrates the use of query by chaincode
  */
 queryChaincode = async (fcn,args,callback) =>{
+
+    console.log("queryChaincode:PEER_NAME" , PEER_NAME);
     // Execute the query
     try{
     chaincodes = await channel.queryByChaincode({
-        targets: USER_NAME,
+        targets: PEER_NAME,
         chaincodeId: CHAINCODE_ID,
         fcn,
         args
     })
     }
     catch(err){
-        console.log("queryChaincode", err);
+        console.log("queryChaincode error ", err);
     }
     // res=`query [a] = ${chaincodes[0].toString("utf8")}\n`;
     // console.log("query [a] = ",chaincodes[0].toString("utf8"))
@@ -502,16 +491,60 @@ queryChaincode = async (fcn,args,callback) =>{
     //     fcn: 'query',
     //     args: ['b']
     // })
-    res =`${chaincodes[0].toString("utf8")}`;
-    console.log("queryChaincode=> ",res)
-
-    callback(res);
+    if(chaincodes.length >= 1){
+        res =`${chaincodes[0].toString("utf8")}`;
+        console.log("queryChaincode=> ",res)
+        callback(res);
+    }else{
+        callback({});
+    }
 }
+
+getPeers = async (callback) =>{
+
+    var peers = channel.getPeers()
+    var arr = []
+    peers.forEach(element => { 
+        var partsOfStr = element.getName().split('.');
+        if(partsOfStr.length >= 4){
+           arr.push({peer:element.getName(), //peer0.exporter.trade.com
+             org: element.getName().slice((element.getName().split('.')[0]).length + 1) , //exporter.trade.com
+             name:partsOfStr[1],//exporter
+             mspid: element.getMspid()}) //ExporterOrgMSP
+        }else{
+            console.log("getPeers length is to short");
+        }
+    }); 
+ 
+    callback(arr);
+}
+getPeer = async (callback) =>{
+
+    var peer =channel.getPeer(PEER_NAME);
+ 
+    var obj = {}
+ 
+    var partsOfStr = peer.getName().split('.');
+        if(partsOfStr.length >= 4){
+            obj = {peer:peer.getName(), //peer0.exporter.trade.com
+             org: peer.getName().slice((peer.getName().split('.')[0]).length + 1) , //exporter.trade.com
+             name:partsOfStr[1],//exporter
+             mspid: peer.getMspid()} //ExporterOrgMSP
+        }else{
+            console.log("getPeers length is to short");
+        }
+
+    callback(obj);
+}
+
+
 
 module.exports = {
     switchAccount,
     invokeChaincode,
-    queryChaincode
+    queryChaincode,
+    getPeer,
+    getPeers
 };
 
 

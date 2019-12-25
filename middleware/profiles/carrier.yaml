@@ -2,7 +2,7 @@
 name: "CarrierrOrg Client"
 version: "1.0"
 client:
-  organization: CarrierrOrg
+  organization: CarrierOrg
   credentialStore:
     path: "./credstore/carrier_client/hfc-kvs"
     cryptoStore:

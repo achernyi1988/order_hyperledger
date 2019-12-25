@@ -40,8 +40,13 @@ const (
 
 func (t *TradeWorkflowChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 	fmt.Printf("%s Initializing Trade\n", funcName())
-	//_, args := stub.GetFunctionAndParameters()
-	var err error
+	creator, err := stub.GetCreator()
+	creatorOrg, creatorCertIssuer, err := getTxCreatorInfo(creator)
+	if err != nil {
+		fmt.Println(fmt.Errorf("Error extracting creator identity info: %s\n", err.Error()))
+		return shim.Error(err.Error())
+	}
+	fmt.Printf("TradeWorkflow Invoke by '%s', '%s'\n", creatorOrg, creatorCertIssuer)
 
 	err = stub.PutState(ImporterBalance, []byte("20000"))
 	if err != nil {
@@ -293,9 +298,7 @@ func (t *TradeWorkflowChaincode) getOrder(stub shim.ChaincodeStubInterface, crea
 		tradeAgreement.DescriptionOfGoods, tradeAgreement.Amount, tradeAgreement.Payment,
 		tradeAgreement.Numbers, tradeAgreement.Status)
 
-	jsonData, err := json.Marshal(tradeAgreement)
-
-	newData, _ := appendValue("key", args[0], jsonData)
+	newData, _ := appendValue("key", args[0], tradeAgreementBytes)
 
 	return shim.Success([]byte(newData))
 }
@@ -332,12 +335,9 @@ func (t *TradeWorkflowChaincode) getShipment(stub shim.ChaincodeStubInterface, c
 	fmt.Printf("%s TradeId[%s] current location [%s] \n", funcName(),
 		shipmentDelivery.TradeId, shipmentDelivery.Location)
 
-	return shim.Success([]byte(
-		"|tradeId?" + shipmentDelivery.TradeId +
-			"|sourcePort?" + shipmentDelivery.SourcePort +
-			"|destinationPort?" + shipmentDelivery.DestinationPort +
-			"|current Location?" + shipmentDelivery.Location +
-			"|endDate?" + shipmentDelivery.EndDate))
+	newData, _ := appendValue("key", args[0], shipmentDeliveryBytes)
+
+	return shim.Success([]byte(newData))
 }
 
 // Request a trade agreement
@@ -443,16 +443,15 @@ func (t *TradeWorkflowChaincode) reset(stub shim.ChaincodeStubInterface, creator
 
 func (t *TradeWorkflowChaincode) updateShipmentLocation(stub shim.ChaincodeStubInterface, creatorOrg string, creatorCertIssuer string, args []string) pb.Response {
 
+	if !t.testMode && !authenticateCarrierOrg(creatorOrg, creatorCertIssuer) {
+		return shim.Error("Caller not a member of Carrier Org. Access denied.")
+	}
+
 	var shipmentKey string
 	var shipmentDelivery *ShipmentDelivery
 	var shipmentDeliveryBytes []byte
 
 	var err error
-
-	// Access control: Only an Importer Org member can invoke this transaction
-	// if !t.testMode && !authenticateImporterOrg(creatorOrg, creatorCertIssuer) {
-	// 	return shim.Error("Caller not a member of Importer Org. Access denied.")
-	// }
 
 	if len(args) != 2 {
 		err = errors.New(fmt.Sprintf("Incorrect number of arguments. Expecting 2: "+
@@ -498,7 +497,12 @@ func (t *TradeWorkflowChaincode) updateShipmentLocation(stub shim.ChaincodeStubI
 		return shim.Error(err.Error())
 	}
 
-	return shim.Success([]byte(tradeAgreement.Status))
+	if tradeAgreement != nil {
+		return shim.Success([]byte(tradeAgreement.Status)) // FINAL destination
+	} else {
+		return shim.Success([]byte(SETOFF)) //udpated the location except for FINAL destination
+	}
+
 }
 
 func (t *TradeWorkflowChaincode) prepareShipment(stub shim.ChaincodeStubInterface, creatorOrg string, creatorCertIssuer string, args []string) pb.Response {
@@ -512,13 +516,13 @@ func (t *TradeWorkflowChaincode) prepareShipment(stub shim.ChaincodeStubInterfac
 	var err error
 
 	// Access control: Only an Importer Org member can invoke this transaction
-	// if !t.testMode && !authenticateImporterOrg(creatorOrg, creatorCertIssuer) {
-	// 	return shim.Error("Caller not a member of Importer Org. Access denied.")
-	// }
+	if !t.testMode && !authenticateExporterOrg(creatorOrg, creatorCertIssuer) {
+		return shim.Error("Caller not a member of Exporter Org. Access denied.")
+	}
 
-	if len(args) != 6 {
-		err = errors.New(fmt.Sprintf("Incorrect number of arguments. Expecting 6: "+
-			"{trade-id, SourcePort, DestinationPort, Location, startDate ,endDate}. Found %d", len(args)))
+	if len(args) != 5 {
+		err = errors.New(fmt.Sprintf("Incorrect number of arguments. Expecting 5: "+
+			"{trade-id, SourcePort, DestinationPort, startDate ,endDate}. Found %d", len(args)))
 		return shim.Error(err.Error())
 	}
 
@@ -557,7 +561,7 @@ func (t *TradeWorkflowChaincode) prepareShipment(stub shim.ChaincodeStubInterfac
 	}
 
 	//update shipment's status
-	shipmentDelivery = &ShipmentDelivery{args[1], args[2], args[3], args[4], args[5], args[0]}
+	shipmentDelivery = &ShipmentDelivery{args[1], args[2], args[1], args[3], args[4], args[0]}
 
 	shipmentDeliveryBytes, err = json.Marshal(shipmentDelivery)
 
@@ -592,9 +596,9 @@ func (t *TradeWorkflowChaincode) makePayment(stub shim.ChaincodeStubInterface, c
 	var err error
 
 	// // Access control: Only an Exporter Org member can invoke this transaction
-	// if !t.testMode && !authenticateExporterOrg(creatorOrg, creatorCertIssuer) {
-	// 	return shim.Error("Caller not a member of Exporter Org. Access denied.")
-	// }
+	if !t.testMode && !(authenticateImporterOrg(creatorOrg, creatorCertIssuer) || authenticateCarrierOrg(creatorOrg, creatorCertIssuer)) {
+		return shim.Error("Caller not a member of Importer or Carrier Orgs. Access denied.")
+	}
 
 	if len(args) != 1 {
 		err = errors.New(fmt.Sprintf("Incorrect number of arguments. Expecting 1: {ID}. Found %d", len(args)))
@@ -692,9 +696,9 @@ func (t *TradeWorkflowChaincode) makePrepayment(stub shim.ChaincodeStubInterface
 	var err error
 
 	// // Access control: Only an Exporter Org member can invoke this transaction
-	// if !t.testMode && !authenticateExporterOrg(creatorOrg, creatorCertIssuer) {
-	// 	return shim.Error("Caller not a member of Exporter Org. Access denied.")
-	// }
+	if !t.testMode && !authenticateImporterOrg(creatorOrg, creatorCertIssuer) {
+		return shim.Error("Caller not a member of Importer Org. Access denied.")
+	}
 
 	if len(args) != 1 {
 		err = errors.New(fmt.Sprintf("Incorrect number of arguments. Expecting 1: {ID}. Found %d", len(args)))
@@ -790,9 +794,9 @@ func (t *TradeWorkflowChaincode) acceptOrder(stub shim.ChaincodeStubInterface, c
 	var err error
 
 	// // Access control: Only an Exporter Org member can invoke this transaction
-	// if !t.testMode && !authenticateExporterOrg(creatorOrg, creatorCertIssuer) {
-	// 	return shim.Error("Caller not a member of Exporter Org. Access denied.")
-	// }
+	if !t.testMode && !authenticateExporterOrg(creatorOrg, creatorCertIssuer) {
+		return shim.Error("Caller not a member of Exporter Org. Access denied.")
+	}
 
 	if len(args) != 1 {
 		err = errors.New(fmt.Sprintf("Incorrect number of arguments. Expecting 1: {ID}. Found %d", len(args)))
